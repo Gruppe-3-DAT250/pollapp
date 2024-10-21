@@ -1,3 +1,6 @@
+<!-- this is the page for creating or logging in as user -->
+
+
 <script>
     import { goto } from '$app/navigation';
     import { usernameStore } from '$lib/store.js';

@@ -1,3 +1,6 @@
+
+<!-- this is the page for showing all polls -->
+
 <script>
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
