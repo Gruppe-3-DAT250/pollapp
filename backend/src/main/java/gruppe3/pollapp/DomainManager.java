@@ -11,7 +11,9 @@ import java.util.List;
 public interface DomainManager {
 
     public void createUser(String username, String password);
+
     public User getUser(Integer id);
+
     public List<User> getAllUsers();
 
 
