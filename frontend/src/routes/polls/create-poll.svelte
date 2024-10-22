@@ -1,3 +1,6 @@
+<!-- this is the page for creating polls -->
+
+
 <script>
     import { usernameStore } from '$lib/store.js';
     import { navigate } from '$app/navigation';
