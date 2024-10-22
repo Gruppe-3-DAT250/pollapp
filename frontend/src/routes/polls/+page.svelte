@@ -4,18 +4,19 @@
 <script>
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import { writable } from 'svelte/store';
     import pollsData from '../../data/fake_polls.json';
 
     let polls = [];
-    let selectedPoll = null;
 
     onMount(() => {
         polls = pollsData; // remove
     });
-
     function selectPoll(id) {
-        selectedPoll = polls.find(poll => poll.id === id);
+        goto(`/polls/${id}`);
+    }
+
+    function goToCreatePoll(){
+        goto('/polls/create-poll');
     }
 
 </script>
@@ -23,21 +24,14 @@
 <div class="poll">
     {#if polls.length > 0}
         <h2>Polls</h2>
+        <button on:click={goToCreatePoll}>Create Poll</button>
+
         {#each polls as poll}
             <div class="poll-box">
-                {poll.question}
+                <p>{poll.question}</p>
                 <button on:click={() => selectPoll(poll.id)}>Choose Poll</button>
             </div>
         {/each}
-        {#if selectedPoll}
-            <h3>{selectedPoll.question}</h3>
-            <ul>
-                {#each selectedPoll.options as option}
-                    <li>{option.caption}</li>
-                {/each}
-            </ul>
-            <button on:click={() => (selectedPoll = null)}>Back</button>
-        {/if}
     {:else}
         <h3>No polls available</h3>
     {/if}

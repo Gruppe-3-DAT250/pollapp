@@ -2,8 +2,8 @@
 
 
 <script>
-    import { usernameStore } from '$lib/store.js';
-    import { navigate } from '$app/navigation';
+    import { userStore } from '$lib/store.js';
+    import pollsData from '../../data/fake_polls.json';
 
     let question = '';
     let options = [''];
@@ -18,11 +18,11 @@
     }
 
     function createPoll() {
-        const pollData = { // variables need to be changes
+        const pollData = { // variables need to be changed
             question,
             publishedAt: new Date().toISOString(),
-            validUntil: new Date().toISOString(),
-            creator: { username: $usernameStore },
+            validUntil: new Date().toISOString(), // change to userinput?
+            creator: { username: $userStore.username },
             options: options.map((option, index) => ({
                 caption: option,
                 presentationOrder: (index + 1).toString(),

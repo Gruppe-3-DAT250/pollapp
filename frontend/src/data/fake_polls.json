@@ -1,3 +1,71 @@
-{
-
-}
+[
+  {
+    "id": 1,
+    "question": "What is your favorite programming language?",
+    "publishedAt": "2024-09-01T09:00:00Z",
+    "validUntil": "2024-09-07T09:00:00Z",
+    "creator": {
+      "username": "user1"
+    },
+    "options": [
+      {
+        "caption": "JavaScript",
+        "presentationOrder": 1
+      },
+      {
+        "caption": "Python",
+        "presentationOrder": 2
+      },
+      {
+        "caption": "Haskell",
+        "presentationOrder": 3
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "question": "Which framework do you prefer?",
+    "publishedAt": "2024-10-05T14:30:00Z",
+    "validUntil": "2024-10-10T14:30:00Z",
+    "creator": {
+      "username": "user2"
+    },
+    "options": [
+      {
+        "caption": "React",
+        "presentationOrder": 1
+      },
+      {
+        "caption": "Angular",
+        "presentationOrder": 2
+      },
+      {
+        "caption": "Svelte",
+        "presentationOrder": 3
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "question": "What is your favorite operating system?",
+    "publishedAt": "2024-08-15T08:45:00Z",
+    "validUntil": "2024-08-22T08:45:00Z",
+    "creator": {
+      "username": "user3"
+    },
+    "options": [
+      {
+        "caption": "Windows",
+        "presentationOrder": 1
+      },
+      {
+        "caption": "Linux",
+        "presentationOrder": 2
+      },
+      {
+        "caption": "macOS",
+        "presentationOrder": 3
+      }
+    ]
+  }
+]
