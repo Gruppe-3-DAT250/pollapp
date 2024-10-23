@@ -35,16 +35,19 @@
         // must be connected to api
     }
 
-    function goBack(){
-        goto("/polls")
-    }
+
 </script>
+
+<div class="nav-bar">
+    <span on:click={() => goto('/polls')} class="nav-item">Polls</span>
+    <span class="nav-item active">Create Poll</span>
+</div>
 
 <div class="container">
     <div class="poll">
         <h2>Create New Poll</h2>
-        <form on:submit|preventDefault={createPoll}>
-            <label for="question">Question:</label>
+        <form on:submit|preventDefault={createPoll} >
+            <label for="question" class="question">Question:</label>
             <input type="text" id="question" bind:value={question} required />
 
             <div class="options-container">
@@ -56,25 +59,62 @@
 
             <button type="button" class="add-option" on:click={addOption}>Add Another Option</button>
             <button type="submit" class="submit-button">Submit</button>
+
             <p>{responseMessage}</p>
-            <button type="button" class="submit-button" on:click={goBack}>Go back</button>
         </form>
     </div>
 </div>
 
 <style>
-    .container {
+
+
+    .nav-bar {
+        position: fixed;
+        top: 0;
+        width: 100%;
         display: flex;
         justify-content: center;
-        align-items: center;
-        height: 100vh;
+        background-color: #222;
+        padding: 20px;
+        font-size: 1.5rem;
+        color: white;
+        z-index: 1000;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
+
+    .nav-item {
+        color: white;
+        margin: 0 25px;
+        padding: 15px;
+        cursor: pointer;
+    }
+
+    .nav-item.active {
+        border-bottom: 3px solid white;
+    }
+
+    .nav-item:hover {
+        background-color: #555;
+    }
+
+    .container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
     .poll {
-        background-color: lightblue;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        width: 400px;
+        background-color: #e0e0e0;
+        padding: 20px;
+        border-radius: 5px;
+        width: 50%;
+        margin-top: 10%;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
     }
 
     input[type="text"] {
@@ -84,12 +124,15 @@
         border: 1px solid;
         border-radius: 4px;
         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        font-size: 1.25rem;
     }
+
     .options-container {
         display: flex;
         flex-direction: column;
         margin-bottom: 15px;
     }
+
     .add-option, .submit-button {
         margin-top: 15px;
         padding: 10px;
@@ -98,9 +141,15 @@
         border-style: solid;
         border-radius: 4px;
         width: 100%;
+        font-size: 1.25rem;
     }
+
     button {
         cursor: pointer;
+    }
+
+    .question{
+        font-size: 1.5rem;
     }
 
 </style>

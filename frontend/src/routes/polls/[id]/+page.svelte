@@ -32,20 +32,20 @@
 
 <div class="container">
     {#if poll}
-        <div class="poll-details">
+        <div class="poll">
             <h2>{poll.question}</h2>
             <ul class="options-list">
                 {#each poll.options as option}
                     <li class="option-box">
                         <span>{option.caption}</span>
                         <div class="vote-button-container">
-                            <span class="vote-count">{option.votes || 0} votes</span>
-                            <button>Vote</button>
+                            <span class="vote-count">{option.votes || 0}</span>
+                            <button class="vote-button">Vote</button>
                         </div>
                     </li>
                 {/each}
             </ul>
-            <button on:click={goBack}>Back to Polls</button>
+            <button on:click={goBack} class="back-button">Back to Polls</button>
         </div>
     {:else}
         <p>Poll not found.</p>
@@ -53,39 +53,81 @@
 </div>
 
 <style>
-    .container {
+    body {
+        background-color: #f6f8fa;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
         display: flex;
         justify-content: center;
-        align-items: center;
-        height: 100vh;
+        align-items: flex-start;
     }
-    .poll-details {
-        background-color: lightblue;
-        padding: 30px;
-        border-radius: 8px;
-        width: 500px;
+
+    .container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
     }
+
+
+    .poll {
+        background-color: #e0e0e0;
+        padding: 20px;
+        border-radius: 5px;
+        width: 50%;
+        max-height: 100vh;
+        overflow-y: auto;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-top: 40px;
+    }
+
     .options-list {
         list-style-type: none;
         padding: 0;
     }
-    .option-box {
 
+    .option-box {
         background-color: white;
         padding: 15px;
-        border: 1px solid;
+        border: 1px solid #ccc;
         border-radius: 5px;
         margin-bottom: 10px;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
+
     .vote-button-container {
         display: flex;
         align-items: center;
-    }
-    .vote-count {
-        margin-right: 10px;
+
     }
 
+    .vote-count {
+        margin-right: 10px;
+        font-size: 1.5rem;
+        display: inline;
+    }
+
+    .back-button, .vote-button {
+        margin-top: 15px;
+        padding: 10px;
+        background-color: grey;
+        color: white;
+        border-style: solid;
+        border-radius: 4px;
+        width: 100%;
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
+
+    .back-button:hover, .vote-button:hover {
+        background-color: darkgray;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
 </style>
