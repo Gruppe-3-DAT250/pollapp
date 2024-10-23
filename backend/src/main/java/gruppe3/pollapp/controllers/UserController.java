@@ -22,7 +22,6 @@ public class UserController {
 
     }
 
-
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(domainManager.getAllUsers());
