@@ -1,58 +1,70 @@
-<!-- this is the page for creating or logging in as user -->
-
-
 <script>
     import { goto } from '$app/navigation';
     import { userStore } from '$lib/store.js';
-    import users from '../data/fake_users.json';  // Assuming the json is in $lib directory
+    import users from '../../data/fake_users.json';  // Assuming the json is in $lib directory
 
 
     let username = '';
     let password = '';
+    let checkPassword = '';
+    let email = '';
     let success = false;
     let error = '';
 
-    async function signIn(){
+    async function createUser() {
         const existingUser = users.find(user => user.username === username);
         if (existingUser){
-            if (existingUser.password === password){
+            error = "Username taken. Log in or try again."
+        }
+        else{
+            if (password === checkPassword){
+                const newUser = {
+                    username : username,
+                    email: email,
+                    password: password,
+                    polls: [],
+                    votes: [],
+                    createdAt: new Date().toISOString(),
+                };
+
+                users.push(newUser);
                 success = true;
                 userStore.set(username);
-                await goto('/polls');
+                goto('/polls')
             }
-            else {
-                error = "Incorrect password. Please try again.";
+
+            else{
+                error = "Passwords doesn't match"
             }
-        }
-        else {
-            error = "User does not exist. Create new user!"
         }
     }
 
-    function goToSignUp(){
-        goto("/create_user");
+    function goToSignIn() {
+        goto('/');
     }
-
-
 </script>
 
 <div class="container">
     <div class="user">
-        <h2>Sign in or create user</h2>
+        <h2>Create User</h2>
 
         <input type="text" bind:value={username} placeholder="Username" required />
         <input type="password" bind:value={password} placeholder="Password" required />
+        <input type="password" bind:value={checkPassword} placeholder="Retype password" required />
+        <input type="email" bind:value={email} placeholder="Email" required />
 
         {#if error}
             <p style="color: red;">{error}</p>
         {/if}
 
-        <button on:click={signIn}>Sign in</button>
-        <p>Are you new?<p>
-        <a on:click={goToSignUp} style="cursor: pointer; color: blue; text-decoration: underline;">
-            Click here to create a user.
-        </a>
+        <button on:click={createUser}>Create User</button>
 
+        <p>
+            <p>Already have an account?<p>
+            <a on:click={goToSignIn} style="cursor: pointer; color: blue; text-decoration: underline;">
+                Click here to sign in.
+            </a>
+        </p>
     </div>
 </div>
 
@@ -89,5 +101,4 @@
         cursor: pointer;
         margin: 10px 0;
     }
-
 </style>

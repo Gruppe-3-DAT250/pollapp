@@ -1,0 +1,34 @@
+[
+  {
+    "username": "user1",
+    "email": "user1@example.com",
+    "password": "password123",
+    "polls": [],
+    "votes": [],
+    "createdAt": "2024-07-20T10:15:00Z"
+  },
+  {
+    "username": "user2",
+    "email": "user2@example.com",
+    "password": "password123",
+    "polls": [],
+    "votes": [],
+    "createdAt": "2024-08-05T13:25:00Z"
+  },
+  {
+    "username": "user3",
+    "email": "user3@example.com",
+    "password": "password123",
+    "polls": [],
+    "votes": [],
+    "createdAt": "2024-09-12T17:40:00Z"
+  },
+  {
+    "username": "user4",
+    "email": "user4@example.com",
+    "password": "password123",
+    "polls": [],
+    "votes": [],
+    "createdAt": "2024-10-01T11:05:00Z"
+  }
+]
