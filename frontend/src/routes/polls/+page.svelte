@@ -9,7 +9,7 @@
     let polls = [];
 
     onMount(() => {
-        polls = pollsData; // remove fetch for API call
+        polls = pollsData; // remove
     });
     function selectPoll(id) {
         goto(`/polls/${id}`);
