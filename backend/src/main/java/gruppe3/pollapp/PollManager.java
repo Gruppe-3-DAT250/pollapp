@@ -17,12 +17,13 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public void createUser(String username, String password) {
+    public User createUser(String username, String password) {
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
         users.put(idCounter, user);
         idCounter++;
+        return user;
     }
 
     @Override
@@ -33,5 +34,19 @@ public class PollManager implements DomainManager{
     @Override
     public List<User> getAllUsers() {
         return  new ArrayList<User>(users.values());
+    }
+
+    @Override
+    public void deleteUser(Integer id) {
+        users.remove(id);
+    }
+
+    public User verifyUser(String username, String email){
+        for (User user : users.values()) {
+            if (user.getEmail().equals(email) && user.getUsername().equals(username)) {
+                return user;
+            }
+        }
+        return null;
     }
 }

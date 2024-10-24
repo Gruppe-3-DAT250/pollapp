@@ -17,9 +17,9 @@
             error = "Username taken. Log in or try again."
         }
         else{
-            if (password === checkPassword){
+            if (password === checkPassword) {
                 const newUser = {
-                    username : username,
+                    username: username,
                     email: email,
                     password: password,
                     polls: [],
@@ -27,14 +27,28 @@
                     createdAt: new Date().toISOString(),
                 };
 
-                users.push(newUser);
-                success = true;
-                userStore.set(username);
-                goto('/polls')
-            }
+                try {
+                    const response = await fetch('v1/api/user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(newUser)
+                    });
 
-            else{
-                error = "Passwords doesn't match"
+                    if (response.ok) {
+                        success = true;
+                        userStore.set(username);
+                        goto('/polls');
+                    } else {
+                        const responseData = await response.json();
+                        error = responseData.message || "Error creating user";
+                    }
+                } catch (err) {
+                    error = "Server error";
+                }
+            } else{
+                error = "Password doesnt match";
             }
         }
     }
