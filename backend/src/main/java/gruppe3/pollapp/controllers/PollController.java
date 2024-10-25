@@ -31,9 +31,7 @@ public class PollController {
 
     @PostMapping(value = "/create_poll", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Poll> createPoll(@RequestBody Poll poll) {
-
         System.out.println("Received poll: " + poll);
-
 
         manager.addPoll(1, poll);
         return ResponseEntity.ok(poll);
