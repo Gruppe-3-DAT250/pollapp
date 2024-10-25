@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "3.3.4"
     id("io.spring.dependency-management") version "1.1.6"
     id("org.asciidoctor.jvm.convert") version "3.3.2"
+    id("com.avast.gradle.docker-compose") version "0.17.10"
 }
 
 group = "Gruppe3"
@@ -50,10 +51,27 @@ dependencies {
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.testcontainers:rabbitmq")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+}
+
+apply(plugin = "docker-compose")
+
+dockerCompose {
+    useComposeFiles = listOf("docker-compose.yml")
+    startedServices = listOf("postgres")
+    // startedServices = listOf("postgres, mongo") // TODO: uncomment this when mongo is in place
+
+    stopContainers = true
+    removeContainers = true
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.named("bootRun") {
+    dependsOn("composeUp")
+    finalizedBy("composeDown")
 }
 
 tasks.test {

@@ -1,0 +1,21 @@
+version: "3"
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: verysecret
+    ports:
+      - "5432:5432"
+    container_name: pollapp-postgres
+    volumes:
+      - ./database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
+    # TODO: MONGO CONFIG IS PLACEHOLDER
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: verysecret
+    ports:
+      - "27017:27017"
+    container_name: pollapp-mongo
