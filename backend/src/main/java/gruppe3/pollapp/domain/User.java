@@ -1,11 +1,13 @@
 package gruppe3.pollapp.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
+@Table(name="users") // User is a reserved table name
 public class User {
 
     @Id
