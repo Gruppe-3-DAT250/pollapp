@@ -13,9 +13,6 @@ public class Poll {
     private String question;
     private Instant publishedAt;
     private Instant validUntil;
-
-    //@JsonBackReference
-    //private User creator;
     @JsonManagedReference
     private Map<String, VoteOption> options;
 
@@ -68,4 +65,6 @@ public class Poll {
     public void setId(int id) {
         this.id = id;
     }
+
+
 }

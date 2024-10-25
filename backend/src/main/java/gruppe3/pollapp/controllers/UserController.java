@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+@CrossOrigin
 @RestController
 @RequestMapping("/v1/api/user")
 public class UserController {
@@ -31,11 +31,14 @@ public class UserController {
         return ResponseEntity.ok(domainManager.getUser(id));
     }
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestParam String username, @RequestParam String email) {
-        User user = domainManager.createUser(username, email);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(user);
+    @PostMapping("/create_user")
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        try {
+            User createdUser = domainManager.createUser(user.getUsername(), user.getEmail(), user.getPassword());
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @DeleteMapping("/{id}")

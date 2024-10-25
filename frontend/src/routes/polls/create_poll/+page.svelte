@@ -7,8 +7,11 @@
     import { goto } from '$app/navigation';
 
     let question = '';
+    let validUntil = '';
     let options = [''];
     let responseMessage = '';
+
+    const baseUrl = "http://localhost:8080";
 
     function addOption() {
         options = [...options, ''];
@@ -18,29 +21,17 @@
         options[index] = value;
     }
 
-    function createPoll() {
-        const pollData = { // variables need to be changed
-            question,
-            publishedAt: new Date().toISOString(),
-            validUntil: new Date().toISOString(), // change to userinput?
-            creator: { username: $userStore.username },
-            options: options.map((option, index) => ({
-                caption: option,
-                presentationOrder: (index + 1).toString(),
-            })),
-        };
+    async function createPoll() {
 
-        console.log("Poll created:", pollData);
-        responseMessage = "Poll created!";
-        // must be connected to api
     }
+
 
 
 </script>
 
 <div class="nav-bar">
-    <span on:click={() => goto('/polls')} class="nav-item">Polls</span>
-    <span class="nav-item active">Create Poll</span>
+    <a href="/polls" class="nav-item">Polls</a>
+    <a href="/polls/create_poll" class="nav-item active">Create Poll</a>
 </div>
 
 <div class="container">
@@ -56,6 +47,8 @@
                     <input type="text" id={"option" + index} bind:value={options[index]} on:input={e => updateOption(index, e.target.value)} required />
                 {/each}
             </div>
+
+            <input type="date" bind:value={validUntil} placeholder="Valid Until" />
 
             <button type="button" class="add-option" on:click={addOption}>Add Another Option</button>
             <button type="submit" class="submit-button">Submit</button>
@@ -87,6 +80,7 @@
         margin: 0 25px;
         padding: 15px;
         cursor: pointer;
+        text-decoration: none;
     }
 
     .nav-item.active {

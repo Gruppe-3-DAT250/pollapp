@@ -11,6 +11,8 @@
     let success = false;
     let error = '';
 
+    const baseUrl = "http://localhost:8080";
+
     async function createUser() {
         const existingUser = users.find(user => user.username === username);
         if (existingUser){
@@ -28,7 +30,7 @@
                 };
 
                 try {
-                    const response = await fetch('v1/api/user', {
+                    const response = await fetch(`${baseUrl}/v1/api/user/create_user`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -73,12 +75,12 @@
 
         <button on:click={createUser}>Create User</button>
 
-        <p>
-            <p>Already have an account?<p>
-            <a on:click={goToSignIn} style="cursor: pointer; color: blue; text-decoration: underline;">
-                Click here to sign in.
-            </a>
-        </p>
+        <p>Already have an account?<p>
+
+        <button on:click={goToSignIn} style="cursor: pointer; margin: -20px 0 0 -10px; color: blue; background: none; border: none; text-decoration: underline; text-align: left">
+            Click here to sign in.
+        </button>
+
     </div>
 </div>
 

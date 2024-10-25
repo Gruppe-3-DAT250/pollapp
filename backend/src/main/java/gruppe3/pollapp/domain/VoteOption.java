@@ -16,10 +16,7 @@ public class VoteOption {
 
 
     public VoteOption() {
-        this.caption = "";
-        this.presentationOrder = 0;
-        this.id = "";
-        this.votes = new ArrayList<>();
+
     }
 
     public String getCaption() {

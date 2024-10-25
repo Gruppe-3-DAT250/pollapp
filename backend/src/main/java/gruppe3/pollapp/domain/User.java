@@ -2,6 +2,7 @@ package gruppe3.pollapp.domain;
 
 public class User {
 
+    private Integer id;
     private String username;
     private String password;
     private String email;
@@ -34,5 +35,13 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }
