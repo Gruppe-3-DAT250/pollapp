@@ -5,6 +5,7 @@ import gruppe3.pollapp.domain.Poll;
 import gruppe3.pollapp.domain.User;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 
 @Component
@@ -20,9 +21,8 @@ public interface DomainManager {
 
     User verifyUser(String username, String email);
 
-    User getUserByUsername(String username);
-
-    List<Poll> getPolls();
+    Collection<Poll> getPolls();
 
     void addPoll(Integer id, Poll poll);
+
 }

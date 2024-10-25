@@ -3,8 +3,9 @@
 
 <script>
     import { userStore } from '$lib/store.js';
-    import pollsData from '../../../data/fake_polls.json';
     import { goto } from '$app/navigation';
+    import { fetchPolls } from '$lib/api';
+
 
     let question = '';
     let validUntil = '';
@@ -26,11 +27,14 @@
         const pollData = {
             question: question,
             publishedAt: new Date().toISOString(),
-            validUntil: new Date().toISOString(),
-            options: {
-                "1": { caption: "success", presentationOrder: "1" }
-                // Add more options as needed
-            }
+            validUntil: new Date(validUntil).toISOString(),
+            options: options.reduce((acc, option, index) => {
+                acc[(index + 1).toString()] = {
+                    caption: option,
+                    presentationOrder: (index + 1).toString()
+                };
+                return acc;
+            }, {})
         };
 
         console.log(pollData)
@@ -51,6 +55,8 @@
         if (response.ok){
             console.log("success")
             responseMessage = "Poll created!"
+            await fetchPolls();
+            await goto('/polls');
         }
         else{
             const data = await response.json();

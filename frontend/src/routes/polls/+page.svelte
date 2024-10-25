@@ -4,13 +4,19 @@
 <script>
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import pollsData from '../../data/fake_polls.json';
+    import { fetchPolls } from '$lib/api';
+
 
     let polls = [];
 
-    onMount(() => {
-        polls = pollsData.flat(); // remove
+    onMount(async () => {
+        try {
+            polls = await fetchPolls();
+        } catch (error) {
+            console.error("Failed to fetch polls:", error);
+        }
     });
+
     function selectPoll(id) {
         goto(`/polls/${id}`);
     }

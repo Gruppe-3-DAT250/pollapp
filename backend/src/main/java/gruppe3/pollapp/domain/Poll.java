@@ -13,7 +13,6 @@ public class Poll {
     private String question;
     private Instant publishedAt;
     private Instant validUntil;
-    @JsonManagedReference
     private Map<String, VoteOption> options;
 
     public Poll(){

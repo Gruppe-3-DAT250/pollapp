@@ -11,7 +11,7 @@ public class VoteOption {
     private String caption;
     private long presentationOrder;
     private String id;
-    @JsonManagedReference
+
     private List<Vote> votes;
 
 

@@ -4,24 +4,30 @@
 <script>
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
-    import pollsData from '../../../data/fake_polls.json';
     import { page } from '$app/stores';
+    import { fetchPolls } from '$lib/api';
+
 
     let poll = null;
     let pollId;
 
-    $: pollId = $page.params.id ? parseInt($page.params.id) : null; // Ensure it's parsed as a number
+    $: pollId = $page.params.id ? parseInt($page.params.id) : null;
 
-    onMount(() => {
-        const flattenedData = pollsData.flat();
+    onMount(async () => {
+        try {
+            const data = await fetchPolls();
 
-        if (pollId) {
-            const foundPoll = flattenedData.find(p => p.id === pollId);
-            if (foundPoll) {
-                poll = foundPoll;
-            } else {
-                poll = null;
+            if (pollId !== undefined) {
+                const foundPoll = data.find(p => p.id === pollId);
+                if (foundPoll) {
+                    poll = foundPoll;
+                } else {
+                    poll = null;
+                }
             }
+        } catch (error) {
+            console.error("Failed to fetch polls:", error);
+            poll = null;
         }
     });
 
@@ -35,7 +41,7 @@
         <div class="poll">
             <h2>{poll.question}</h2>
             <ul class="options-list">
-                {#each poll.options as option}
+                {#each Object.values(poll.options) as option}
                     <li class="option-box">
                         <span>{option.caption}</span>
                         <div class="vote-button-container">

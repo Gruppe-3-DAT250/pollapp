@@ -4,10 +4,7 @@ import gruppe3.pollapp.domain.Poll;
 import gruppe3.pollapp.domain.User;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class PollManager implements DomainManager{
@@ -15,6 +12,8 @@ public class PollManager implements DomainManager{
     private final Map<Integer, Poll> polls = new HashMap<>();
 
     private Integer idCounter_user = 0;
+    private Integer idCounter_poll = 0;
+
 
     public PollManager() {
 
@@ -57,23 +56,14 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public User getUserByUsername(String username) {
-        for (User user : users.values()) {
-            if (user.getUsername().equals(username)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public List<Poll> getPolls() {
-        return (List<Poll>) polls.values();
+    public Collection<Poll> getPolls(){
+        return polls.values();
     }
 
     @Override
     public void addPoll(Integer id, Poll poll){
         polls.put(id, poll);
+
     }
 
 }
