@@ -14,10 +14,14 @@
     let username;
     let userVote = null;
     let unsubscribe;
+    let isExpired;
 
     console.log(username)
 
     $: pollId = $page.params.id ? parseInt($page.params.id) : null;
+
+    $: isExpired = poll && new Date(poll.validUntil) < new Date();
+    console.log(isExpired)
 
     const baseUrl = "http://localhost:8080";
 
@@ -142,15 +146,18 @@
         }
     }
 
-
     function goBack() {
         goto('/polls');
     }
+
 </script>
 
 <div class="container">
     {#if poll}
-        <div class="poll">
+        <div class="poll {isExpired ? 'expired' : ''}">
+            {#if isExpired}
+                <p class="expired-message">Expired Poll</p>
+            {/if}
             <h2>{poll.question}</h2>
             <ul class="options-list">
                 {#each Object.values(poll.options) as option (option.id)}
@@ -163,7 +170,7 @@
                                     Remove Vote
                                 </button>
                             {:else}
-                                <button class="vote-button" on:click={() => makeVote(option.id)} disabled={userVote !== null}>
+                                <button class="vote-button" on:click={() => makeVote(option.id)} disabled={userVote !== null || isExpired}>
                                     Vote
                                 </button>
                             {/if}
@@ -201,9 +208,23 @@
         margin-top: 40px;
     }
 
+    .poll.expired {
+        background-color: #ffcccc;
+        color: #ff0000;
+    }
+
     .options-list {
         list-style-type: none;
         padding: 0;
+    }
+
+    .expired-message {
+        font-weight: bold;
+        font-size: 2rem;
+        text-decoration: underline;
+        color: #ff0000;
+        margin-bottom: 10px;
+        text-align: center;
     }
 
     .option-box {
@@ -215,6 +236,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        font-size: 2rem;
     }
 
     .vote-button-container {
@@ -225,7 +247,7 @@
 
     .vote-count {
         margin-right: 10px;
-        font-size: 1.5rem;
+        font-size: 2rem;
         display: inline;
     }
 

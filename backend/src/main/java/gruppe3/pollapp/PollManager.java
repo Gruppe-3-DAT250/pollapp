@@ -48,6 +48,32 @@ public class PollManager implements DomainManager{
         poll1.setOptions(options);
 
         addPoll(poll1);
+
+        Poll poll2 = new Poll();
+        poll2.setQuestion("Which is the best programming language?");
+        poll2.setPublishedAt(Instant.now());
+        poll2.setValidUntil(Instant.now().minusSeconds(5));
+
+
+        VoteOption option2_poll2 = new VoteOption();
+        option2_poll2.setId(1);
+        option2_poll2.setCaption("Python");
+        option2_poll2.setPresentationOrder(2);
+
+        List<Vote> votesToAdd = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            votesToAdd.add(new Vote());
+        }
+        option2_poll2.setVotes(votesToAdd);
+
+        Map<Integer, VoteOption> options_poll2 = new HashMap<>();
+        options_poll2.put(0, option1);
+        options_poll2.put(1, option2_poll2);
+
+        poll2.setOptions(options_poll2);
+
+
+        addPoll(poll2);
     }
 
     @Override
