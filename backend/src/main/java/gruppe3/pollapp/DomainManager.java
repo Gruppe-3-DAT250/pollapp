@@ -14,13 +14,13 @@ public interface DomainManager {
 
     User createUser(String username, String password, String email);
 
-    User getUser(Integer id);
+    User getUser(Long id);
 
     User getUser(String username);
 
     List<User> getAllUsers();
 
-    void deleteUser(Integer id);
+    void deleteUser(Long id);
 
     User verifyUser(String username, String email);
 

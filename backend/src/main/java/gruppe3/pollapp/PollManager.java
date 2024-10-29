@@ -11,10 +11,10 @@ import java.util.*;
 
 @Repository
 public class PollManager implements DomainManager{
-    private final HashMap<Integer, User> users = new HashMap<>();
+    private final HashMap<Long, User> users = new HashMap<>();
     private final Map<Integer, Poll> polls = new HashMap<>();
 
-    private Integer idCounter_user = 0;
+    private Long idCounter_user = 0L;
     private Integer idCounter_poll = 0;
 
     public PollManager() {
@@ -63,7 +63,7 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public User getUser(Integer id) {
+    public User getUser(Long id) {
         return users.get(id);
     }
 
@@ -83,7 +83,7 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public void deleteUser(Integer id) {
+    public void deleteUser(Long id) {
         users.remove(id);
     }
 

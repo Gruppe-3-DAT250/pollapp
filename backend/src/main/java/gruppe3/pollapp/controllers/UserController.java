@@ -35,7 +35,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Integer id) {
+    public ResponseEntity<User> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(domainManager.getUser(id));
     }
 
@@ -63,7 +63,7 @@ public class UserController {
     //     return ResponseEntity.ok(domainManager.getUser(id));
     // }
 
-    @PostMapping("/create_user")
+    @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
         try {
             User createdUser = domainManager.createUser(user.getUsername(), user.getEmail(), user.getPassword());
@@ -75,7 +75,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         try {
             domainManager.deleteUser(id);
             return ResponseEntity.ok("User deleted");

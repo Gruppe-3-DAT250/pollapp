@@ -17,7 +17,7 @@
 
     onMount(async () => {
         try {
-            const response = await fetch(`${baseUrl}/v1/api/user`);
+            const response = await fetch(`${baseUrl}/v1/api/users`);
             if (response.ok) {
                 users = await response.json();
             } else {
