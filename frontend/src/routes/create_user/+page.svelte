@@ -1,6 +1,6 @@
 <script>
     import { goto } from '$app/navigation';
-    import { userStore } from '$lib/store.ts';
+    import { userStore } from '$lib/store';
     import users from '../../data/fake_users.json';
 
 
@@ -31,7 +31,7 @@
         };
 
         try {
-            const response = await fetch(`${baseUrl}/v1/api/users/`, {
+            const response = await fetch(`${baseUrl}/v1/api/users`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

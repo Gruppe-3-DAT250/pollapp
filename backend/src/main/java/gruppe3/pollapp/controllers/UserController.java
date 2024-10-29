@@ -27,11 +27,6 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
-        User user = new User();
-        user.setUsername("Vetle");
-        user.setPassword("Password");
-        userRepository.save(user);
-
         return ResponseEntity.ok(userRepository.findAll());
     }
 
