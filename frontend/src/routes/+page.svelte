@@ -3,21 +3,37 @@
 
 <script>
     import { goto } from '$app/navigation';
-    import { userStore } from '$lib/store.js';
-    import users from '../data/fake_users.json';  // Assuming the json is in $lib directory
+    import { userStore } from '$lib/store.ts';
+    import {onMount} from "svelte";
 
 
     let username = '';
     let password = '';
     let success = false;
     let error = '';
+    let users = [];
+
+    const baseUrl = "http://localhost:8080";
+
+    onMount(async () => {
+        try {
+            const response = await fetch(`${baseUrl}/v1/api/user`);
+            if (response.ok) {
+                users = await response.json();
+            } else {
+                console.error("Failed to fetch users:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    });
 
     async function signIn(){
         const existingUser = users.find(user => user.username === username);
         if (existingUser){
             if (existingUser.password === password){
                 success = true;
-                userStore.set(username);
+                userStore.setUsername(existingUser.username);
                 await goto('/polls');
             }
             else {

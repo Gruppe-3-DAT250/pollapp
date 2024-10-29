@@ -10,9 +10,7 @@ export async function fetchPolls() {
     });
 
     if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        return data;
+        return await response.json();
     } else {
         const error = await response.json();
         console.error(error.message);

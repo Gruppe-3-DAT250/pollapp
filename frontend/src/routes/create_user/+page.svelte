@@ -1,7 +1,7 @@
 <script>
     import { goto } from '$app/navigation';
-    import { userStore } from '$lib/store.js';
-    import users from '../../data/fake_users.json';  // Assuming the json is in $lib directory
+    import { userStore } from '$lib/store.ts';
+    import users from '../../data/fake_users.json';
 
 
     let username = '';
@@ -14,44 +14,41 @@
     const baseUrl = "http://localhost:8080";
 
     async function createUser() {
-        const existingUser = users.find(user => user.username === username);
-        if (existingUser){
-            error = "Username taken. Log in or try again."
+        // add function to check if username is taken
+
+        if (password !== checkPassword) {
+            error = "Passwords do not match.";
+            return;
         }
-        else{
-            if (password === checkPassword) {
-                const newUser = {
-                    username: username,
-                    email: email,
-                    password: password,
-                    polls: [],
-                    votes: [],
-                    createdAt: new Date().toISOString(),
-                };
 
-                try {
-                    const response = await fetch(`${baseUrl}/v1/api/user/create_user`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(newUser)
-                    });
+        const newUser = {
+            username: username,
+            email: email,
+            password: password,
+            polls: [],
+            votes: [],
+            createdAt: new Date().toISOString(),
+        };
 
-                    if (response.ok) {
-                        success = true;
-                        userStore.set(username);
-                        goto('/polls');
-                    } else {
-                        const responseData = await response.json();
-                        error = responseData.message || "Error creating user";
-                    }
-                } catch (err) {
-                    error = "Server error";
-                }
-            } else{
-                error = "Password doesnt match";
+        try {
+            const response = await fetch(`${baseUrl}/v1/api/user/create_user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newUser)
+            });
+
+            if (response.ok) {
+                success = true;
+                userStore.setUsername(newUser.username);
+                goto('/polls');
+            } else {
+                const responseData = await response.json();
+                error = responseData.message || "Error creating user";
             }
+        } catch (err) {
+            error = "Server error";
         }
     }
 

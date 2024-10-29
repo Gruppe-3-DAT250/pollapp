@@ -3,6 +3,7 @@ package gruppe3.pollapp;
 
 import gruppe3.pollapp.domain.Poll;
 import gruppe3.pollapp.domain.User;
+import gruppe3.pollapp.domain.Vote;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -15,6 +16,8 @@ public interface DomainManager {
 
     User getUser(Integer id);
 
+    User getUser(String username);
+
     List<User> getAllUsers();
 
     void deleteUser(Integer id);
@@ -23,6 +26,12 @@ public interface DomainManager {
 
     Collection<Poll> getPolls();
 
-    void addPoll(Integer id, Poll poll);
+    void addPoll(Poll poll);
+
+    Vote makeVote(String username, Integer pollId, Integer optionId) throws Exception;
+
+    boolean deleteVote(String username, Integer pollId, Integer optionId);
+
+    Integer getUserVoteOption(String username, Integer pollId);
 
 }

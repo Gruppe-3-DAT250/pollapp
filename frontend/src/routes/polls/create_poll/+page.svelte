@@ -2,7 +2,7 @@
 
 
 <script>
-    import { userStore } from '$lib/store.js';
+    import { userStore } from '$lib/store.ts';
     import { goto } from '$app/navigation';
     import { fetchPolls } from '$lib/api';
 
@@ -29,15 +29,15 @@
             publishedAt: new Date().toISOString(),
             validUntil: new Date(validUntil).toISOString(),
             options: options.reduce((acc, option, index) => {
-                acc[(index + 1).toString()] = {
+                acc[(index).toString()] = {
                     caption: option,
-                    presentationOrder: (index + 1).toString()
+                    presentationOrder: (index + 1).toString(),
+                    id: (index).toString()
                 };
                 return acc;
             }, {})
         };
 
-        console.log(pollData)
 
         const params = new URLSearchParams({
             username: $userStore
@@ -53,7 +53,6 @@
         })
 
         if (response.ok){
-            console.log("success")
             responseMessage = "Poll created!"
             await fetchPolls();
             await goto('/polls');

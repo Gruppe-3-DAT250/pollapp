@@ -13,7 +13,7 @@ public class Poll {
     private String question;
     private Instant publishedAt;
     private Instant validUntil;
-    private Map<String, VoteOption> options;
+    private Map<Integer, VoteOption> options;
 
     public Poll(){
 
@@ -42,11 +42,11 @@ public class Poll {
         this.validUntil = validUntil;
     }
 
-    public Map<String, VoteOption> getOptions() {
+    public Map<Integer, VoteOption> getOptions() {
         return options;
     }
 
-    public void setOptions(Map<String, VoteOption> options) {
+    public void setOptions(Map<Integer, VoteOption> options) {
         this.options = options;
     }
 

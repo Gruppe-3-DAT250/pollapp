@@ -18,7 +18,6 @@ import java.util.Map;
 @CrossOrigin
 public class PollController {
     private final PollManager manager;
-    private int idCounter = 0;
 
     public PollController(@Autowired PollManager manager) {
         this.manager = manager;
@@ -32,9 +31,7 @@ public class PollController {
 
     @PostMapping(value = "/create_poll", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Poll> createPoll(@RequestBody Poll poll) {
-        poll.setId(idCounter);
-        manager.addPoll(idCounter, poll);
-        idCounter++;
+        manager.addPoll(poll);
         return ResponseEntity.ok(poll);
     }
 
