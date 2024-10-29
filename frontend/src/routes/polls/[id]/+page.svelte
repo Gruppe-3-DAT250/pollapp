@@ -6,7 +6,7 @@
     import {goto} from '$app/navigation';
     import {page} from '$app/stores';
     import {fetchPolls} from '$lib/api';
-    import {userStore} from '$lib/store.ts';
+    import {userStore} from '$lib/store';
 
 
     let poll = null;

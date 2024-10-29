@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin // FIXME: REMOVE
+
 @RestController
 @RequestMapping("/v1/api/users")
+@CrossOrigin // FIXME: REMOVE
 public class UserController {
 
     private final DomainManager domainManager;
