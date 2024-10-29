@@ -1,5 +1,5 @@
 
-<!-- this is the page for showing individual polls -->
+<!-- this is the page for showing individual polls. -->
 
 <script>
     import {onDestroy, onMount} from 'svelte';
