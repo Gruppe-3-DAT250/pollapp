@@ -10,4 +10,3 @@ create table Users (
     email varchar(255),
     primary key (id)
 );
-insert into Users (username, password, email) VALUES ('eivind', 'hallo123', 'hei@teit.com');

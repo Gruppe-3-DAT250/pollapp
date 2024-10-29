@@ -9,6 +9,7 @@ services:
     container_name: pollapp-postgres
     volumes:
       - ./database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./database/mock-data.sql:/docker-entrypoint-initdb.d/mock-data.sql
 
     # TODO: MONGO CONFIG IS PLACEHOLDER
   mongo:

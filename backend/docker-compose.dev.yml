@@ -1,0 +1,35 @@
+version: "3"
+services:
+  # TODO: Use secrets to avoid showing passwords.
+  # https://docs.docker.com/compose/how-tos/use-secrets/
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: verysecret
+    ports:
+      - "5432:5432"
+    container_name: pollapp-postgres
+    volumes:
+      - ./database/postgres/init-tables.sql:/docker-entrypoint-initdb.d/init-tables.sql
+      - ./database/postgres/mock-data.sql:/docker-entrypoint-initdb.d/mock-data.sql
+    networks:
+      - pollapp
+
+  # TODO: MONGO CONFIG IS PLACEHOLDER
+  # https://hub.docker.com/_/mongo
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: verysecret
+    ports:
+      - "27017:27017"
+    container_name: pollapp-mongo
+    volumes:
+      # TODO: Implement this script. It exists with some instructions
+      - ./database/mongo/init-mongo.sh:init-mongo.sh
+    networks:
+      - pollapp
+
+networks:
+  pollapp:
