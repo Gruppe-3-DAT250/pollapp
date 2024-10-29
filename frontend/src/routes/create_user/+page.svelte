@@ -1,3 +1,6 @@
+<!-- this is the page for creating a user -->
+
+
 <script>
     import { goto } from '$app/navigation';
     import { userStore } from '$lib/store.ts';

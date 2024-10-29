@@ -1,4 +1,4 @@
-<!-- this is the page for creating or logging in as user -->
+<!-- this is the page for logging in as user -->
 
 
 <script>
