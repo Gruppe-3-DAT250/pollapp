@@ -1,7 +1,7 @@
 <script>
     import { goto } from '$app/navigation';
-    import { userStore } from '$lib/store.js';
-    import users from '../../data/fake_users.json';  // Assuming the json is in $lib directory
+    import { userStore } from '$lib/store.ts';
+    import users from '../../data/fake_users.json';
 
 
     let username = '';
@@ -11,31 +11,44 @@
     let success = false;
     let error = '';
 
+    const baseUrl = "http://localhost:8080";
+
     async function createUser() {
-        const existingUser = users.find(user => user.username === username);
-        if (existingUser){
-            error = "Username taken. Log in or try again."
+        // add function to check if username is taken
+
+        if (password !== checkPassword) {
+            error = "Passwords do not match.";
+            return;
         }
-        else{
-            if (password === checkPassword){
-                const newUser = {
-                    username : username,
-                    email: email,
-                    password: password,
-                    polls: [],
-                    votes: [],
-                    createdAt: new Date().toISOString(),
-                };
 
-                users.push(newUser);
+        const newUser = {
+            username: username,
+            email: email,
+            password: password,
+            polls: [],
+            votes: [],
+            createdAt: new Date().toISOString(),
+        };
+
+        try {
+            const response = await fetch(`${baseUrl}/v1/api/user/create_user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newUser)
+            });
+
+            if (response.ok) {
                 success = true;
-                userStore.set(username);
-                goto('/polls')
+                userStore.setUsername(newUser.username);
+                goto('/polls');
+            } else {
+                const responseData = await response.json();
+                error = responseData.message || "Error creating user";
             }
-
-            else{
-                error = "Passwords doesn't match"
-            }
+        } catch (err) {
+            error = "Server error";
         }
     }
 
@@ -59,12 +72,12 @@
 
         <button on:click={createUser}>Create User</button>
 
-        <p>
-            <p>Already have an account?<p>
-            <a on:click={goToSignIn} style="cursor: pointer; color: blue; text-decoration: underline;">
-                Click here to sign in.
-            </a>
-        </p>
+        <p>Already have an account?<p>
+
+        <button on:click={goToSignIn} style="cursor: pointer; margin: -20px 0 0 -10px; color: blue; background: none; border: none; text-decoration: underline; text-align: left">
+            Click here to sign in.
+        </button>
+
     </div>
 </div>
 

@@ -1,22 +1,37 @@
 package gruppe3.pollapp;
 
 
+import gruppe3.pollapp.domain.Poll;
 import gruppe3.pollapp.domain.User;
+import gruppe3.pollapp.domain.Vote;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 
 @Component
 public interface DomainManager {
 
-    public void createUser(String username, String password);
+    User createUser(String username, String password, String email);
 
-    public User getUser(Integer id);
+    User getUser(Integer id);
 
-    public List<User> getAllUsers();
+    User getUser(String username);
 
+    List<User> getAllUsers();
 
+    void deleteUser(Integer id);
 
+    User verifyUser(String username, String email);
+
+    Collection<Poll> getPolls();
+
+    void addPoll(Poll poll);
+
+    Vote makeVote(String username, Integer pollId, Integer optionId) throws Exception;
+
+    boolean deleteVote(String username, Integer pollId, Integer optionId);
+
+    Integer getUserVoteOption(String username, Integer pollId);
 
 }
