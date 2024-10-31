@@ -22,8 +22,6 @@ public interface DomainManager {
 
     void deleteUser(Integer id);
 
-    User verifyUser(String username, String email);
-
     Collection<Poll> getPolls();
 
     void addPoll(Poll poll);

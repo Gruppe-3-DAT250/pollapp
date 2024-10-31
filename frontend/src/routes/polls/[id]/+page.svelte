@@ -6,33 +6,31 @@
     import {goto} from '$app/navigation';
     import {page} from '$app/stores';
     import {fetchPolls} from '$lib/api';
-    import {userStore} from '$lib/store.ts';
+    import {authStore} from '$lib/store.ts';
 
 
     let poll = null;
     let pollId;
-    let username;
+    let authToken;
     let userVote = null;
     let unsubscribe;
     let isExpired;
 
-    console.log(username)
 
     $: pollId = $page.params.id ? parseInt($page.params.id) : null;
 
     $: isExpired = poll && new Date(poll.validUntil) < new Date();
-    console.log(isExpired)
 
     const baseUrl = "http://localhost:8080";
 
 
     onMount(async () => {
-        unsubscribe = userStore.subscribe(value => {
-            username = value.username;
+        unsubscribe = authStore.subscribe(value => {
+            authToken = value.authToken;
         });
 
         try {
-            const data = await fetchPolls();
+            const data = await fetchPolls(authToken);
 
 
             if (pollId !== undefined) {
@@ -40,20 +38,15 @@
                 if (foundPoll) {
                     poll = foundPoll;
 
-                    const params = new URLSearchParams({
-                        username: username,
-                        pollId: pollId
+                    const voteResponse = await fetch(`${baseUrl}/v1/api/vote/hasVoted?pollId=${pollId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                        },
                     });
 
-                    const voteResponse = await fetch(`${baseUrl}/v1/api/vote/hasVoted?${params.toString()}`, {
-                        method: 'GET',
-                    });
                     if (voteResponse.ok) {
-                        if (voteResponse.status === 204) {
-                            userVote = null;
-                        } else {
-                            userVote = await voteResponse.json()
-                        }
+                        userVote = voteResponse.status === 204 ? null : await voteResponse.json();
                     } else {
                         console.error("Failed to check if user has voted:", voteResponse.statusText);
                     }
@@ -76,13 +69,11 @@
 
     async function makeVote(optionId) {
         try {
-            const params = new URLSearchParams({
-                username: username,
-                pollId: pollId
-            });
-
-            const response = await fetch(`${baseUrl}/v1/api/vote/${optionId}?${params.toString()}`, {
+            const response = await fetch(`${baseUrl}/v1/api/vote/${optionId}?pollId=${pollId}`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                },
             });
 
             if (response.ok) {
@@ -110,13 +101,11 @@
 
     async function removeVote(optionId) {
         try {
-            const params = new URLSearchParams({
-                username: username,
-                pollId: pollId
-            });
-
-            const response = await fetch(`${baseUrl}/v1/api/vote/${optionId}?${params.toString()}`, {
+            const response = await fetch(`${baseUrl}/v1/api/vote/${optionId}?pollId=${pollId}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                },
             });
 
             if (response.ok) {
@@ -124,7 +113,7 @@
                 if (option) {
                     option = {
                         ...option,
-                        votes: option.votes.filter(vote => vote.user.username !== username),
+                        votes: option.votes.filter(vote => vote.user.username !== authToken.username),
                     };
 
 

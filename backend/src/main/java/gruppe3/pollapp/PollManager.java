@@ -114,16 +114,6 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public User verifyUser(String username, String email){
-        for (User user : users.values()) {
-            if (user.getEmail().equals(email) && user.getUsername().equals(username)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    @Override
     public Collection<Poll> getPolls(){
         return polls.values();
     }

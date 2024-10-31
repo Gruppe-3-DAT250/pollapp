@@ -3,45 +3,38 @@
 
 <script>
     import { goto } from '$app/navigation';
-    import { userStore } from '$lib/store.ts';
-    import {onMount} from "svelte";
-
+    import { authStore } from '$lib/store.ts';
 
     let username = '';
     let password = '';
-    let success = false;
     let error = '';
-    let users = [];
-
     const baseUrl = "http://localhost:8080";
 
-    onMount(async () => {
-        try {
-            const response = await fetch(`${baseUrl}/v1/api/user`);
-            if (response.ok) {
-                users = await response.json();
-            } else {
-                console.error("Failed to fetch users:", response.statusText);
-            }
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        }
-    });
 
-    async function signIn(){
-        const existingUser = users.find(user => user.username === username);
-        if (existingUser){
-            if (existingUser.password === password){
-                success = true;
-                userStore.setUsername(existingUser.username);
+
+    async function signIn() {
+        try {
+            const response = await fetch(`${baseUrl}/v1/api/user/signIn`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                }),
+            });
+
+            if (response.ok) {
+                const { token } = await response.json();
+                authStore.setToken(token);
                 await goto('/polls');
+            } else {
+                error = "Invalid credentials. Please try again.";
             }
-            else {
-                error = "Incorrect password. Please try again.";
-            }
-        }
-        else {
-            error = "User does not exist. Create new user!"
+        } catch (err) {
+            console.error("Login error:", err);
+            error = "An error occurred. Please try again later.";
         }
     }
 

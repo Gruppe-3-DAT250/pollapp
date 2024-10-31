@@ -1,20 +1,26 @@
 import { writable } from 'svelte/store';
 
-function createUserStore() {
+function createAuthStore() {
     const { subscribe, set } = writable({
-        username: typeof window !== 'undefined' ? localStorage.getItem('username') : null,
+        authToken: typeof window !== 'undefined' ? localStorage.getItem('authToken') : null,
     });
 
     return {
         subscribe,
         // @ts-ignore
-        setUsername: (name) => {
-            set({ username: name });
+        setToken: (token) => {
+            set({ authToken: token });
             if (typeof window !== 'undefined') {
-                localStorage.setItem('username', name);
+                localStorage.setItem('authToken', token);
+            }
+        },
+        clearAuth: () => {
+            set({ authToken: null });
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('authToken');
             }
         }
     };
 }
 
-export const userStore = createUserStore();
+export const authStore = createAuthStore();

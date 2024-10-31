@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 
+import java.security.Principal;
+import java.util.Base64;
+
 @RestController
 @RequestMapping("/v1/api/vote")
 @CrossOrigin
@@ -37,8 +40,15 @@ public class VoteController {
     }
 
     @GetMapping("/hasVoted")
-    public ResponseEntity<Integer> hasUserVoted(@RequestParam String username, @RequestParam Integer pollId) {
+    public ResponseEntity<Integer> hasUserVoted(@RequestParam Integer pollId, @RequestHeader("Authorization") String authHeader) {
+        String username = extractUsernameFromToken(authHeader);
+
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         Integer voteOptionId = domainManager.getUserVoteOption(username, pollId);
+
         if (voteOptionId == null) {
             return ResponseEntity.noContent().build();
         }
@@ -46,7 +56,18 @@ public class VoteController {
         return ResponseEntity.ok(voteOptionId);
     }
 
-
+    // TODO: Replace/Remove with Sprint Security
+    private String extractUsernameFromToken(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            String decoded = new String(Base64.getDecoder().decode(token));
+            String[] parts = decoded.split(":");
+            if (parts.length > 0) {
+                return parts[0];
+            }
+        }
+        return null;
+    }
 
 
 }
