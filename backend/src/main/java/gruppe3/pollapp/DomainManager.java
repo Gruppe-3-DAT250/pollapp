@@ -22,6 +22,8 @@ public interface DomainManager {
 
     void deleteUser(Integer id);
 
+    String extractUsernameFromToken(String authHeader);
+
     Collection<Poll> getPolls();
 
     void addPoll(Poll poll);

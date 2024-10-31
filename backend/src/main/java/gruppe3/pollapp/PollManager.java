@@ -11,10 +11,10 @@ import java.util.*;
 
 @Repository
 public class PollManager implements DomainManager{
-    private final HashMap<Integer, User> users = new HashMap<>();
+    private final HashMap<Long, User> users = new HashMap<>();
     private final Map<Integer, Poll> polls = new HashMap<>();
 
-    private Integer idCounter_user = 0;
+    private Long idCounter_user = 0L;
     private Integer idCounter_poll = 0;
 
     public PollManager() {
@@ -50,14 +50,19 @@ public class PollManager implements DomainManager{
         addPoll(poll1);
 
         Poll poll2 = new Poll();
-        poll2.setQuestion("Which is the best programming language?");
+        poll2.setQuestion("What's your favourite food?");
         poll2.setPublishedAt(Instant.now());
         poll2.setValidUntil(Instant.now().minusSeconds(5));
 
+        VoteOption option1_poll2 = new VoteOption();
+        option1_poll2.setId(0);
+        option1_poll2.setCaption("Pizza");
+        option1_poll2.setPresentationOrder(1);
+        option1_poll2.setVotes(new ArrayList<>());
 
         VoteOption option2_poll2 = new VoteOption();
         option2_poll2.setId(1);
-        option2_poll2.setCaption("Python");
+        option2_poll2.setCaption("Salmon with ketchup and bearnaise sauce");
         option2_poll2.setPresentationOrder(2);
 
         List<Vote> votesToAdd = new ArrayList<>();
@@ -67,7 +72,7 @@ public class PollManager implements DomainManager{
         option2_poll2.setVotes(votesToAdd);
 
         Map<Integer, VoteOption> options_poll2 = new HashMap<>();
-        options_poll2.put(0, option1);
+        options_poll2.put(0, option1_poll2);
         options_poll2.put(1, option2_poll2);
 
         poll2.setOptions(options_poll2);
@@ -111,6 +116,19 @@ public class PollManager implements DomainManager{
     @Override
     public void deleteUser(Integer id) {
         users.remove(id);
+    }
+
+    // TODO: Replace/Remove with Sprint Security
+    public String extractUsernameFromToken(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            String decoded = new String(Base64.getDecoder().decode(token));
+            String[] parts = decoded.split(":");
+            if (parts.length > 0) {
+                return parts[0];
+            }
+        }
+        return null;
     }
 
     @Override

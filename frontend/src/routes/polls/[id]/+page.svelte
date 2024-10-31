@@ -15,40 +15,57 @@
     let userVote = null;
     let unsubscribe;
     let isExpired;
+    let username;
 
 
     $: pollId = $page.params.id ? parseInt($page.params.id) : null;
 
-    $: isExpired = poll && new Date(poll.validUntil) < new Date();
-
     const baseUrl = "http://localhost:8080";
 
+    function extractUsernameFromToken(token) {
+        if (token) {
+
+            const decoded = atob(token);
+            const parts = decoded.split(':');
+            if (parts.length > 0) {
+                return parts[0];
+            }
+        }
+        return null;
+    }
 
     onMount(async () => {
         unsubscribe = authStore.subscribe(value => {
             authToken = value.authToken;
+            username = extractUsernameFromToken(authToken)
         });
+
 
         try {
             const data = await fetchPolls(authToken);
 
 
-            if (pollId !== undefined) {
+            if (pollId !== undefined ) {
                 const foundPoll = data.find(p => p.id === pollId);
                 if (foundPoll) {
                     poll = foundPoll;
 
-                    const voteResponse = await fetch(`${baseUrl}/v1/api/vote/hasVoted?pollId=${pollId}`, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`,
-                        },
-                    });
+                    isExpired = new Date(poll.validUntil) < new Date();
 
-                    if (voteResponse.ok) {
-                        userVote = voteResponse.status === 204 ? null : await voteResponse.json();
-                    } else {
-                        console.error("Failed to check if user has voted:", voteResponse.statusText);
+                    if (!isExpired) {
+                        console.log(isExpired)
+                        const voteResponse = await fetch(`${baseUrl}/v1/api/vote/hasVoted?pollId=${pollId}`, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${authToken}`,
+                            },
+                        });
+
+                        if (voteResponse.ok) {
+                            userVote = voteResponse.status === 204 ? null : await voteResponse.json();
+                        } else {
+                            console.error("Failed to check if user has voted:", voteResponse.statusText);
+                        }
                     }
                 } else {
                     poll = null;
@@ -73,24 +90,23 @@
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json',
                 },
             });
 
             if (response.ok) {
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    const updatedOption = await response.json();
-                    const option = poll.options[optionId];
+                const updatedOption = await response.json();
+                const option = poll.options[optionId];
 
-                    if (option) {
-                        option.votes.push(updatedOption);
-                        userVote = option.id;
-                    } else {
-                        console.error("Option not found:", optionId);
-                    }
-
-                    poll = {...poll};
+                if (option) {
+                    option.votes.push(updatedOption);
+                    userVote = option.id;
+                } else {
+                    console.error("Option not found:", optionId);
                 }
+
+                poll = {...poll};
+
             } else {
                 console.error("Failed to vote:", response.statusText);
             }
@@ -113,7 +129,7 @@
                 if (option) {
                     option = {
                         ...option,
-                        votes: option.votes.filter(vote => vote.user.username !== authToken.username),
+                        votes: option.votes.filter(vote => vote.user.username !== username),
                     };
 
 

@@ -3,15 +3,12 @@
 
 <script>
     import { goto } from '$app/navigation';
-    import { userStore } from '$lib/store.ts';
-    import users from '../../data/fake_users.json';
-
+    import { authStore } from '$lib/store.ts';
 
     let username = '';
     let password = '';
     let checkPassword = '';
     let email = '';
-    let success = false;
     let error = '';
 
     const baseUrl = "http://localhost:8080";
@@ -37,14 +34,14 @@
             const response = await fetch(`${baseUrl}/v1/api/user/create_user`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(newUser)
             });
 
             if (response.ok) {
-                success = true;
-                userStore.setUsername(newUser.username);
+                const data = await response.json();
+                authStore.setToken(data.token);
                 goto('/polls');
             } else {
                 const responseData = await response.json();

@@ -36,11 +36,12 @@ public class UserController {
     }
 
     @PostMapping("/create_user")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
             User createdUser = domainManager.createUser(user.getUsername(), user.getEmail(), user.getPassword());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+            String token = generateToken(createdUser);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponse(token));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -58,7 +59,6 @@ public class UserController {
 
     @PostMapping("/signIn")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
-        System.out.println("Login attempt for user: " + loginRequest.getUsername());
         User user = domainManager.getUser(loginRequest.getUsername());
         if(user != null && user.getPassword().equals(loginRequest.getPassword())){
             String token = generateToken(user);

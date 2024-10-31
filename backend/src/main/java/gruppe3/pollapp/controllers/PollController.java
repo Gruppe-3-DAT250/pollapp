@@ -30,7 +30,11 @@ public class PollController {
     }
 
     @PostMapping(value = "/create_poll", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Poll> createPoll(@RequestBody Poll poll) {
+    public ResponseEntity<Poll> createPoll(@RequestBody Poll poll, @RequestHeader("Authorization") String authHeader) {
+        String username = manager.extractUsernameFromToken(authHeader);
+        User user = manager.getUser(username);
+        Long user_id = user.getId();
+        poll.setCreator_id(user_id);
         manager.addPoll(poll);
         return ResponseEntity.ok(poll);
     }

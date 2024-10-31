@@ -23,14 +23,17 @@ public class VoteController {
     }
 
     @PostMapping("/{optionId}")
-    public ResponseEntity<Vote> makeVote(@RequestParam String username, @RequestParam Integer pollId, @PathVariable Integer optionId) throws Exception {
+    public ResponseEntity<Vote> makeVote(@RequestParam Integer pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) throws Exception {
+        String username = domainManager.extractUsernameFromToken(authToken);
         Vote vote = domainManager.makeVote(username,pollId,optionId);
+
         return ResponseEntity.ok(vote);
     }
 
 
     @DeleteMapping("/{optionId}")
-    public ResponseEntity<String> deleteVote(@RequestParam String username, @RequestParam Integer pollId, @PathVariable Integer optionId) {
+    public ResponseEntity<String> deleteVote(@RequestParam Integer pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) {
+        String username = domainManager.extractUsernameFromToken(authToken);
         boolean isDeleted = domainManager.deleteVote(username, pollId, optionId);
         if (isDeleted) {
             return ResponseEntity.ok("Vote deleted successfully");
@@ -41,7 +44,7 @@ public class VoteController {
 
     @GetMapping("/hasVoted")
     public ResponseEntity<Integer> hasUserVoted(@RequestParam Integer pollId, @RequestHeader("Authorization") String authHeader) {
-        String username = extractUsernameFromToken(authHeader);
+        String username = domainManager.extractUsernameFromToken(authHeader);
 
         if (username == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -56,18 +59,6 @@ public class VoteController {
         return ResponseEntity.ok(voteOptionId);
     }
 
-    // TODO: Replace/Remove with Sprint Security
-    private String extractUsernameFromToken(String authHeader) {
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            String decoded = new String(Base64.getDecoder().decode(token));
-            String[] parts = decoded.split(":");
-            if (parts.length > 0) {
-                return parts[0];
-            }
-        }
-        return null;
-    }
 
 
 }
