@@ -22,9 +22,6 @@ public interface DomainManager {
     List<User> getAllUsers();
 
     void deleteUser(Integer id);
-
-    String extractUsernameFromToken(String authHeader);
-
     Collection<Poll> getPolls();
 
     Poll getPoll(Long id);

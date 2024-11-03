@@ -3,6 +3,7 @@ package gruppe3.pollapp.controllers;
 import gruppe3.pollapp.DomainManager;
 import gruppe3.pollapp.domain.User;
 import gruppe3.pollapp.domain.Vote;
+import gruppe3.pollapp.login.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,9 @@ import java.util.Base64;
 @CrossOrigin
 public class VoteController {
 
+    @Autowired
+    private AuthenticationService authenticationService;
+
     private final DomainManager domainManager;
 
     public VoteController(@Autowired DomainManager domainManager){
@@ -24,7 +28,11 @@ public class VoteController {
 
     @PostMapping("/{optionId}")
     public ResponseEntity<Vote> makeVote(@RequestParam Long pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) throws Exception {
-        String username = domainManager.extractUsernameFromToken(authToken);
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = authenticationService.extractUsernameFromToken(authToken);
         Vote vote = domainManager.makeVote(username,pollId,optionId);
 
         return ResponseEntity.ok(vote);
@@ -33,7 +41,11 @@ public class VoteController {
 
     @DeleteMapping("/{optionId}")
     public ResponseEntity<String> deleteVote(@RequestParam Long pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) {
-        String username = domainManager.extractUsernameFromToken(authToken);
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = authenticationService.extractUsernameFromToken(authToken);
         boolean isDeleted = domainManager.deleteVote(username, pollId, optionId);
         if (isDeleted) {
             return ResponseEntity.ok("Vote deleted successfully");
@@ -43,8 +55,13 @@ public class VoteController {
     }
 
     @GetMapping("/hasVoted")
-    public ResponseEntity<Integer> hasUserVoted(@RequestParam Long pollId, @RequestHeader("Authorization") String authHeader) {
-        String username = domainManager.extractUsernameFromToken(authHeader);
+    public ResponseEntity<Integer> hasUserVoted(@RequestParam Long pollId, @RequestHeader("Authorization") String authToken) {
+
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = authenticationService.extractUsernameFromToken(authToken);
 
         if (username == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

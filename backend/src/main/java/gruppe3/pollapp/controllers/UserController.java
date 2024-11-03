@@ -2,6 +2,7 @@ package gruppe3.pollapp.controllers;
 
 import gruppe3.pollapp.DomainManager;
 import gruppe3.pollapp.domain.User;
+import gruppe3.pollapp.login.AuthenticationService;
 import gruppe3.pollapp.login.LoginRequest;
 import gruppe3.pollapp.login.LoginResponse;
 import org.apache.coyote.Response;
@@ -18,6 +19,10 @@ import java.util.List;
 @RequestMapping("/v1/api/user")
 public class UserController {
 
+    @Autowired
+    private AuthenticationService authenticationService;
+
+
     private final DomainManager domainManager;
 
     public UserController(@Autowired DomainManager domainManager) {
@@ -26,12 +31,19 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<User>> getAllUsers(@RequestHeader("Authorization") String authToken) {
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         return ResponseEntity.ok(domainManager.getAllUsers());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Integer id) {
+    public ResponseEntity<User> getUser(@PathVariable Integer id, @RequestHeader("Authorization") String authToken) {
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         return ResponseEntity.ok(domainManager.getUser(id));
     }
 
@@ -40,7 +52,7 @@ public class UserController {
         try {
             User createdUser = domainManager.createUser(user.getUsername(), user.getEmail(), user.getPassword());
 
-            String token = generateToken(createdUser);
+            String token = authenticationService.generateToken(createdUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponse(token));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -48,7 +60,11 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
+    public ResponseEntity<String> deleteUser(@PathVariable Integer id, @RequestHeader("Authorization") String authToken) {
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         try {
             domainManager.deleteUser(id);
             return ResponseEntity.ok("User deleted");
@@ -59,21 +75,16 @@ public class UserController {
 
     @PostMapping("/signIn")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
+
         User user = domainManager.getUser(loginRequest.getUsername());
         if(user != null && user.getPassword().equals(loginRequest.getPassword())){
-            String token = generateToken(user);
+            String token = authenticationService.generateToken(user);
+            System.out.println(token);
             return ResponseEntity.ok(new LoginResponse(token));
         }
         else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user");
         }
     }
-
-    // TODO: helper function - should be removed/replaced before production
-    private String generateToken(User user) {
-        String tokenData = user.getUsername() + ":" + System.currentTimeMillis();
-        return Base64.getEncoder().encodeToString(tokenData.getBytes());
-    }
-
 
 }

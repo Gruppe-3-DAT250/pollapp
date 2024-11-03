@@ -4,12 +4,15 @@
 <script>
     import {onMount} from 'svelte';
     import {goto} from '$app/navigation';
+    import {authStore} from "$lib/store.ts";
 
 
     let activePolls = [];
     let expiredPolls = [];
+    let unsubscribe;
+    let authToken;
 
-    async function fetchPolls(token) {
+    async function fetchPolls() {
         const baseUrl = "http://localhost:8080";
         const url = `${baseUrl}/v1/api/polls/get_polls`;
 
@@ -17,7 +20,7 @@
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
+                "Authorization": `Bearer ${authToken}`,
             },
         });
 
@@ -32,6 +35,10 @@
 
     onMount(async () => {
         try {
+            unsubscribe = authStore.subscribe(value => {
+                authToken = value.authToken;
+            });
+
             const allPolls = await fetchPolls();
 
             const now = new Date();

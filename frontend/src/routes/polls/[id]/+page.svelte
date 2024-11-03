@@ -14,24 +14,12 @@
     let userVote = null;
     let unsubscribe;
     let isExpired;
-    let username;
 
 
     $: pollId = $page.params.id ? parseInt($page.params.id) : null;
 
     const baseUrl = "http://localhost:8080";
 
-    function extractUsernameFromToken(token) {
-        if (token) {
-
-            const decoded = atob(token);
-            const parts = decoded.split(':');
-            if (parts.length > 0) {
-                return parts[0];
-            }
-        }
-        return null;
-    }
 
     async function fetchVoteOptions() {
         try {
@@ -54,7 +42,6 @@
     onMount(async () => {
         unsubscribe = authStore.subscribe(value => {
             authToken = value.authToken;
-            username = extractUsernameFromToken(authToken);
         });
 
         try {
@@ -102,7 +89,7 @@
             const response = await fetch(`${baseUrl}/v1/api/vote/${optionId}?pollId=${pollId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${authToken}`,
+                    'Authorization': `Bearer ${authToken.trim()}`,
                     'Content-Type': 'application/json',
                 },
             });

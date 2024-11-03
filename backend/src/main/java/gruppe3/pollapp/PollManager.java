@@ -118,19 +118,6 @@ public class PollManager implements DomainManager{
         users.remove(id);
     }
 
-    // TODO: Replace/Remove with Sprint Security
-    public String extractUsernameFromToken(String authHeader) {
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            String decoded = new String(Base64.getDecoder().decode(token));
-            String[] parts = decoded.split(":");
-            if (parts.length > 0) {
-                return parts[0];
-            }
-        }
-        return null;
-    }
-
     @Override
     public Collection<Poll> getPolls(){
         return polls.values();
