@@ -51,12 +51,12 @@
                 return acc;
             }, {})
         };
-
         const response = await fetch(`${baseUrl}/v1/api/polls/create_poll`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
                 'Authorization': `Bearer ${authToken}`,
+                "Content-Type": "application/json"
+
             },
             body: JSON.stringify(pollData)
         })
@@ -71,6 +71,15 @@
         }
 
 
+    }
+
+    async function fetchCsrfToken() {
+        const response = await fetch(`${baseUrl}/csrf`, {
+            method: "GET",
+            credentials: "include"
+        });
+        const data = await response.json();
+        return data.csrfToken;
     }
 
 
@@ -95,7 +104,7 @@
                     <input type="text" id={"option" + index} bind:value={options[index]} on:input={e => updateOption(index, e.target.value)} required />
                 {/each}
             </div>
-
+            <p>Valid until:</p>
             <input type="date" bind:value={validUntil} placeholder="Valid Until" />
 
             <button type="button" class="add-option" on:click={addOption}>Add Another Option</button>

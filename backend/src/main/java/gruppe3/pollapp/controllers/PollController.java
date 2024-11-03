@@ -29,21 +29,13 @@ public class PollController {
     }
 
     @GetMapping("/get_polls")
-    public ResponseEntity<Collection<Poll>> getPolls(@RequestHeader("Authorization") String authToken) {
-        if (!authenticationService.validateToken(authToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
+    public ResponseEntity<Collection<Poll>> getPolls() {
         Collection<Poll> pollsForFrontend = manager.getPolls();
         return ResponseEntity.ok(pollsForFrontend);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Poll> getPollById(@PathVariable Long id, @RequestHeader("Authorization") String authToken) {
-        if (!authenticationService.validateToken(authToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
+    public ResponseEntity<Poll> getPollById(@PathVariable Long id) {
         Poll poll = manager.getPoll(id);
         if (poll != null) {
             return ResponseEntity.ok(poll);
@@ -54,12 +46,7 @@ public class PollController {
 
     @PostMapping(value = "/create_poll", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Poll> createPoll(@RequestBody Poll poll, @RequestHeader("Authorization") String authToken) {
-        if (!authenticationService.validateToken(authToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String token = authToken.startsWith("Bearer ") ? authToken.substring(7) : authToken;
-        String username = authenticationService.extractUsernameFromToken(token);
+        String username = authenticationService.extractUsernameFromToken(authToken);
         User user = manager.getUser(username);
         Long user_id = user.getId();
         poll.setCreator_id(user_id);

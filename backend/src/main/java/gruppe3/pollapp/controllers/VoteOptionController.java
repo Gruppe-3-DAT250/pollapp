@@ -21,8 +21,6 @@ public class VoteOptionController {
 
     private final DomainManager domainManager;
 
-    @Autowired
-    private AuthenticationService authenticationService;
 
     public VoteOptionController(@Autowired DomainManager domainManager){
         this.domainManager = domainManager;
@@ -30,10 +28,7 @@ public class VoteOptionController {
 
 
     @GetMapping("/{pollId}/options")
-    public ResponseEntity<Collection<VoteOption>> getVoteOptions(@PathVariable Long pollId, @RequestHeader("Authorization") String authToken) {
-        if (!authenticationService.validateToken(authToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<Collection<VoteOption>> getVoteOptions(@PathVariable Long pollId) {
 
         Collection<VoteOption> options = domainManager.getVoteOptionsByPollId(pollId);
         return ResponseEntity.ok(options);

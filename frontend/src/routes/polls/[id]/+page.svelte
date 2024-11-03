@@ -86,10 +86,11 @@
 
     async function makeVote(optionId) {
         try {
+
             const response = await fetch(`${baseUrl}/v1/api/vote/${optionId}?pollId=${pollId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${authToken.trim()}`,
+                    'Authorization': `Bearer ${authToken}`,
                     'Content-Type': 'application/json',
                 },
             });

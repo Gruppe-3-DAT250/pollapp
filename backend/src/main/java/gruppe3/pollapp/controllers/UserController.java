@@ -31,19 +31,12 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers(@RequestHeader("Authorization") String authToken) {
-        if (!authenticationService.validateToken(authToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(domainManager.getAllUsers());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Integer id, @RequestHeader("Authorization") String authToken) {
-        if (!authenticationService.validateToken(authToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
+    public ResponseEntity<User> getUser(@PathVariable Integer id) {
         return ResponseEntity.ok(domainManager.getUser(id));
     }
 
@@ -60,10 +53,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Integer id, @RequestHeader("Authorization") String authToken) {
-        if (!authenticationService.validateToken(authToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
 
         try {
             domainManager.deleteUser(id);

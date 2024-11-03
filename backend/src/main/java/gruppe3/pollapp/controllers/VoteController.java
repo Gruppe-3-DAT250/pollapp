@@ -28,10 +28,6 @@ public class VoteController {
 
     @PostMapping("/{optionId}")
     public ResponseEntity<Vote> makeVote(@RequestParam Long pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) throws Exception {
-        if (!authenticationService.validateToken(authToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         String username = authenticationService.extractUsernameFromToken(authToken);
         Vote vote = domainManager.makeVote(username,pollId,optionId);
 
@@ -41,10 +37,6 @@ public class VoteController {
 
     @DeleteMapping("/{optionId}")
     public ResponseEntity<String> deleteVote(@RequestParam Long pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) {
-        if (!authenticationService.validateToken(authToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         String username = authenticationService.extractUsernameFromToken(authToken);
         boolean isDeleted = domainManager.deleteVote(username, pollId, optionId);
         if (isDeleted) {
@@ -56,10 +48,6 @@ public class VoteController {
 
     @GetMapping("/hasVoted")
     public ResponseEntity<Integer> hasUserVoted(@RequestParam Long pollId, @RequestHeader("Authorization") String authToken) {
-
-        if (!authenticationService.validateToken(authToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         String username = authenticationService.extractUsernameFromToken(authToken);
 

@@ -11,9 +11,10 @@
     const baseUrl = "http://localhost:8080";
 
 
-
     async function signIn() {
         try {
+
+
             const response = await fetch(`${baseUrl}/v1/api/user/signIn`, {
                 method: "POST",
                 headers: {
