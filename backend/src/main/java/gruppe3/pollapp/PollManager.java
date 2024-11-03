@@ -12,10 +12,10 @@ import java.util.*;
 @Repository
 public class PollManager implements DomainManager{
     private final HashMap<Long, User> users = new HashMap<>();
-    private final Map<Integer, Poll> polls = new HashMap<>();
+    private final Map<Long, Poll> polls = new HashMap<>();
 
     private Long idCounter_user = 0L;
-    private Integer idCounter_poll = 0;
+    private Long idCounter_poll = 0L;
 
     public PollManager() {
         initializeMockData();
@@ -136,7 +136,8 @@ public class PollManager implements DomainManager{
         return polls.values();
     }
 
-    public Poll getPoll(Integer id) {
+    @Override
+    public Poll getPoll(Long id){
         return polls.get(id);
     }
 
@@ -148,7 +149,7 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public Vote makeVote(String username, Integer pollId, Integer optionId){
+    public Vote makeVote(String username, Long pollId, Integer optionId){
         User user = getUser(username);
         Poll poll = polls.get(pollId);
         if (user == null || poll == null) {
@@ -168,7 +169,7 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public boolean deleteVote(String username, Integer pollId, Integer optionId) {
+    public boolean deleteVote(String username, Long pollId, Integer optionId) {
         User user = getUser(username);
         Poll poll = polls.get(pollId);
         if (user == null || poll == null) {
@@ -195,18 +196,24 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public Integer getUserVoteOption(String username, Integer pollId) {
+    public Integer getUserVoteOption(String username, Long pollId) {
         Poll poll = polls.get(pollId);
 
         for (VoteOption option : poll.getOptions().values()) {
             for (Vote vote : option.getVotes()) {
                 if (vote.getUser().getUsername().equals(username)) {
-                    return option.getId();
+                    return vote.getVoteOption().getId();
                 }
             }
         }
 
         return null;
+    }
+
+    @Override
+    public Collection<VoteOption> getVoteOptionsByPollId(Long pollId) {
+        Poll poll = polls.get(pollId);
+        return poll.getOptions().values();
     }
 
 

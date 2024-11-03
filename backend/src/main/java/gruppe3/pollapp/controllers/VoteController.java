@@ -23,7 +23,7 @@ public class VoteController {
     }
 
     @PostMapping("/{optionId}")
-    public ResponseEntity<Vote> makeVote(@RequestParam Integer pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) throws Exception {
+    public ResponseEntity<Vote> makeVote(@RequestParam Long pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) throws Exception {
         String username = domainManager.extractUsernameFromToken(authToken);
         Vote vote = domainManager.makeVote(username,pollId,optionId);
 
@@ -32,7 +32,7 @@ public class VoteController {
 
 
     @DeleteMapping("/{optionId}")
-    public ResponseEntity<String> deleteVote(@RequestParam Integer pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<String> deleteVote(@RequestParam Long pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) {
         String username = domainManager.extractUsernameFromToken(authToken);
         boolean isDeleted = domainManager.deleteVote(username, pollId, optionId);
         if (isDeleted) {
@@ -43,7 +43,7 @@ public class VoteController {
     }
 
     @GetMapping("/hasVoted")
-    public ResponseEntity<Integer> hasUserVoted(@RequestParam Integer pollId, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Integer> hasUserVoted(@RequestParam Long pollId, @RequestHeader("Authorization") String authHeader) {
         String username = domainManager.extractUsernameFromToken(authHeader);
 
         if (username == null) {
@@ -51,13 +51,14 @@ public class VoteController {
         }
 
         Integer voteOptionId = domainManager.getUserVoteOption(username, pollId);
-
-        if (voteOptionId == null) {
+        if (voteOptionId == null){
             return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(voteOptionId);
     }
+
+
 
 
 

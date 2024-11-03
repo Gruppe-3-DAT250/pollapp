@@ -29,6 +29,16 @@ public class PollController {
         return ResponseEntity.ok(pollsForFrontend);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Poll> getPollById(@PathVariable Long id) {
+        Poll poll = manager.getPoll(id);
+        if (poll != null) {
+            return ResponseEntity.ok(poll);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
     @PostMapping(value = "/create_poll", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Poll> createPoll(@RequestBody Poll poll, @RequestHeader("Authorization") String authHeader) {
         String username = manager.extractUsernameFromToken(authHeader);

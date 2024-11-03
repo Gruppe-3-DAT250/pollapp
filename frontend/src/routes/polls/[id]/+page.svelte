@@ -5,7 +5,6 @@
     import {onDestroy, onMount} from 'svelte';
     import {goto} from '$app/navigation';
     import {page} from '$app/stores';
-    import {fetchPolls} from '$lib/api';
     import {authStore} from '$lib/store.ts';
 
 
@@ -34,48 +33,62 @@
         return null;
     }
 
+    async function fetchVoteOptions() {
+        try {
+            const response = await fetch(`${baseUrl}/v1/api/voteOption/${pollId}/options`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                },
+            });
+            if (response.ok) {
+                poll.options = await response.json();
+            } else {
+                console.error("Failed to fetch vote options:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error fetching vote options:", error);
+        }
+    }
+
     onMount(async () => {
         unsubscribe = authStore.subscribe(value => {
             authToken = value.authToken;
-            username = extractUsernameFromToken(authToken)
+            username = extractUsernameFromToken(authToken);
         });
 
-
         try {
-            const data = await fetchPolls(authToken);
+            const response = await fetch(`${baseUrl}/v1/api/polls/${pollId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                },
+            });
 
+            if (response.ok) {
+                poll = await response.json();
+                isExpired = new Date(poll.validUntil) < new Date();
 
-            if (pollId !== undefined ) {
-                const foundPoll = data.find(p => p.id === pollId);
-                if (foundPoll) {
-                    poll = foundPoll;
+                if (!isExpired) {
+                    const voteResponse = await fetch(`${baseUrl}/v1/api/vote/hasVoted?pollId=${pollId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                        },
+                    });
 
-                    isExpired = new Date(poll.validUntil) < new Date();
-
-                    if (!isExpired) {
-                        console.log(isExpired)
-                        const voteResponse = await fetch(`${baseUrl}/v1/api/vote/hasVoted?pollId=${pollId}`, {
-                            method: 'GET',
-                            headers: {
-                                'Authorization': `Bearer ${authToken}`,
-                            },
-                        });
-
-                        if (voteResponse.ok) {
-                            userVote = voteResponse.status === 204 ? null : await voteResponse.json();
-                        } else {
-                            console.error("Failed to check if user has voted:", voteResponse.statusText);
-                        }
-                    }
-                } else {
-                    poll = null;
+                    userVote = voteResponse.ok && voteResponse.status !== 204 ? await voteResponse.json() : null;
                 }
+
+                await fetchVoteOptions();
+            } else {
+                console.error("Poll not found:", response.statusText);
+                poll = null;
             }
         } catch (error) {
-            console.error("Failed to fetch polls:", error);
+            console.error("Failed to fetch poll:", error);
             poll = null;
         }
-
     });
 
     onDestroy(() => {
@@ -95,16 +108,8 @@
             });
 
             if (response.ok) {
-                const updatedOption = await response.json();
-                const option = poll.options[optionId];
-
-                if (option) {
-                    option.votes.push(updatedOption);
-                    userVote = option.id;
-                } else {
-                    console.error("Option not found:", optionId);
-                }
-
+                await fetchVoteOptions();
+                userVote = optionId;
                 poll = {...poll};
 
             } else {
@@ -125,23 +130,8 @@
             });
 
             if (response.ok) {
-                let option = poll.options[optionId];
-                if (option) {
-                    option = {
-                        ...option,
-                        votes: option.votes.filter(vote => vote.user.username !== username),
-                    };
-
-
-                    poll = {
-                        ...poll,
-                        options: {
-                            ...poll.options,
-                            [optionId]: option
-                        }
-                    };
-                    userVote = null;
-                }
+                userVote = null;
+                await fetchVoteOptions();
 
             } else {
                 console.error("Failed to remove vote:", response.statusText);

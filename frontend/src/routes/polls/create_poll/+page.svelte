@@ -4,7 +4,6 @@
 <script>
     import { authStore } from '$lib/store.ts';
     import { goto } from '$app/navigation';
-    import { fetchPolls } from '$lib/api';
     import {onDestroy, onMount} from "svelte";
 
 
@@ -64,7 +63,6 @@
 
         if (response.ok){
             responseMessage = "Poll created!"
-            await fetchPolls();
             await goto('/polls');
         }
         else{
