@@ -2,14 +2,11 @@ package gruppe3.pollapp.controllers;
 
 import gruppe3.pollapp.DomainManager;
 import gruppe3.pollapp.domain.User;
-<<<<<<< HEAD
 import gruppe3.pollapp.repositories.UserRepository;
-=======
 import gruppe3.pollapp.login.AuthenticationService;
 import gruppe3.pollapp.login.LoginRequest;
 import gruppe3.pollapp.login.LoginResponse;
 import org.apache.coyote.Response;
->>>>>>> backendStart
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Base64;
 import java.util.List;
 
-<<<<<<< HEAD
-
 @RestController
 @CrossOrigin
 @RequestMapping("/v1/api/user")
@@ -27,7 +22,6 @@ public class UserController {
 
     @Autowired
     private AuthenticationService authenticationService;
-
 
     private final DomainManager domainManager;
 
@@ -43,8 +37,8 @@ public class UserController {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        // return ResponseEntity.ok(domainManager.getAllUsers()); // Til lokal mock data
-        return ResponseEntity.ok(userRepository.findAll()); // Til database
+        return ResponseEntity.ok(domainManager.getAllUsers()); // Til lokal mock data
+        // return ResponseEntity.ok(userRepository.findAll()); // Til database
     }
 
     @GetMapping("/{id}")
@@ -65,7 +59,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Integer id, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<String> deleteUser(@PathVariable Long id,
+            @RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -79,15 +74,14 @@ public class UserController {
     }
 
     @PostMapping("/signIn")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 
         User user = domainManager.getUser(loginRequest.getUsername());
-        if(user != null && user.getPassword().equals(loginRequest.getPassword())){
+        if (user != null && user.getPassword().equals(loginRequest.getPassword())) {
             String token = authenticationService.generateToken(user);
             System.out.println(token);
             return ResponseEntity.ok(new LoginResponse(token));
-        }
-        else{
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user");
         }
     }

@@ -23,8 +23,6 @@ public interface DomainManager {
 
     void deleteUser(Long id);
 
-    User verifyUser(String username, String email);
-
     Collection<Poll> getPolls();
 
     Poll getPoll(Long id);
