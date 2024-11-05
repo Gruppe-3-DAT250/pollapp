@@ -1,15 +1,14 @@
+<!-- this is the page for creating a user -->
+
 <script>
-    import { goto } from '$app/navigation';
-    import { userStore } from '$lib/store';
-    import users from '../../data/fake_users.json';
+    import { goto } from "$app/navigation";
+    import { authStore } from "$lib/store.ts";
 
-
-    let username = '';
-    let password = '';
-    let checkPassword = '';
-    let email = '';
-    let success = false;
-    let error = '';
+    let username = "";
+    let password = "";
+    let checkPassword = "";
+    let email = "";
+    let error = "";
 
     const baseUrl = "http://localhost:8080";
 
@@ -32,17 +31,17 @@
 
         try {
             const response = await fetch(`${baseUrl}/v1/api/users`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify(newUser)
+                body: JSON.stringify(newUser),
             });
 
             if (response.ok) {
-                success = true;
-                userStore.setUsername(newUser.username);
-                goto('/polls');
+                const data = await response.json();
+                authStore.setToken(data.token);
+                goto("/polls");
             } else {
                 const responseData = await response.json();
                 error = responseData.message || "Error creating user";
@@ -53,7 +52,7 @@
     }
 
     function goToSignIn() {
-        goto('/');
+        goto("/");
     }
 </script>
 
@@ -61,9 +60,24 @@
     <div class="user">
         <h2>Create User</h2>
 
-        <input type="text" bind:value={username} placeholder="Username" required />
-        <input type="password" bind:value={password} placeholder="Password" required />
-        <input type="password" bind:value={checkPassword} placeholder="Retype password" required />
+        <input
+            type="text"
+            bind:value={username}
+            placeholder="Username"
+            required
+        />
+        <input
+            type="password"
+            bind:value={password}
+            placeholder="Password"
+            required
+        />
+        <input
+            type="password"
+            bind:value={checkPassword}
+            placeholder="Retype password"
+            required
+        />
         <input type="email" bind:value={email} placeholder="Email" required />
 
         {#if error}
@@ -72,12 +86,15 @@
 
         <button on:click={createUser}>Create User</button>
 
-        <p>Already have an account?<p>
-
-        <button on:click={goToSignIn} style="cursor: pointer; margin: -20px 0 0 -10px; color: blue; background: none; border: none; text-decoration: underline; text-align: left">
-            Click here to sign in.
-        </button>
-
+        <p>Already have an account?</p>
+        <p>
+            <button
+                on:click={goToSignIn}
+                style="cursor: pointer; margin: -20px 0 0 -10px; color: blue; background: none; border: none; text-decoration: underline; text-align: left"
+            >
+                Click here to sign in.
+            </button>
+        </p>
     </div>
 </div>
 
@@ -115,3 +132,4 @@
         margin: 10px 0;
     }
 </style>
+

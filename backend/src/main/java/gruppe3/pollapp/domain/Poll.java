@@ -9,10 +9,12 @@ import java.util.Map;
 
 public class Poll {
 
-    private int id;
+    private Long id;
     private String question;
     private Instant publishedAt;
     private Instant validUntil;
+
+    private Long creator_id;
     private Map<Integer, VoteOption> options;
 
     public Poll(){
@@ -57,13 +59,19 @@ public class Poll {
         }
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
+    public Long getCreator_id() {
+        return creator_id;
+    }
 
+    public void setCreator_id(Long creator_id) {
+        this.creator_id = creator_id;
+    }
 }

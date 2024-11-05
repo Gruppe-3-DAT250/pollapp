@@ -1,67 +1,89 @@
-
 <!-- this is the page for showing individual polls. -->
 
 <script>
-    import {onDestroy, onMount} from 'svelte';
-    import {goto} from '$app/navigation';
-    import {page} from '$app/stores';
-    import {fetchPolls} from '$lib/api';
-    import {userStore} from '$lib/store';
-
+    import { onDestroy, onMount } from "svelte";
+    import { goto } from "$app/navigation";
+    import { page } from "$app/stores";
+    import { authStore } from "$lib/store.ts";
 
     let poll = null;
     let pollId;
-    let username;
+    let authToken;
     let userVote = null;
     let unsubscribe;
-
-    console.log(username)
+    let isExpired;
 
     $: pollId = $page.params.id ? parseInt($page.params.id) : null;
 
     const baseUrl = "http://localhost:8080";
 
+    async function fetchVoteOptions() {
+        try {
+            const response = await fetch(
+                `${baseUrl}/v1/api/voteOption/${pollId}/options`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                },
+            );
+            if (response.ok) {
+                poll.options = await response.json();
+            } else {
+                console.error(
+                    "Failed to fetch vote options:",
+                    response.statusText,
+                );
+            }
+        } catch (error) {
+            console.error("Error fetching vote options:", error);
+        }
+    }
 
     onMount(async () => {
-        unsubscribe = userStore.subscribe(value => {
-            username = value.username;
+        unsubscribe = authStore.subscribe((value) => {
+            authToken = value.authToken;
         });
 
         try {
-            const data = await fetchPolls();
+            const response = await fetch(`${baseUrl}/v1/api/polls/${pollId}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
 
+            if (response.ok) {
+                poll = await response.json();
+                isExpired = new Date(poll.validUntil) < new Date();
 
-            if (pollId !== undefined) {
-                const foundPoll = data.find(p => p.id === pollId);
-                if (foundPoll) {
-                    poll = foundPoll;
+                if (!isExpired) {
+                    const voteResponse = await fetch(
+                        `${baseUrl}/v1/api/vote/hasVoted?pollId=${pollId}`,
+                        {
+                            method: "GET",
+                            headers: {
+                                Authorization: `Bearer ${authToken}`,
+                            },
+                        },
+                    );
 
-                    const params = new URLSearchParams({
-                        username: username,
-                        pollId: pollId
-                    });
-
-                    const voteResponse = await fetch(`${baseUrl}/v1/api/vote/hasVoted?${params.toString()}`, {
-                        method: 'GET',
-                    });
-                    if (voteResponse.ok) {
-                        if (voteResponse.status === 204) {
-                            userVote = null;
-                        } else {
-                            userVote = await voteResponse.json()
-                        }
-                    } else {
-                        console.error("Failed to check if user has voted:", voteResponse.statusText);
-                    }
-                } else {
-                    poll = null;
+                    userVote =
+                        voteResponse.ok && voteResponse.status !== 204
+                            ? await voteResponse.json()
+                            : null;
                 }
+
+                await fetchVoteOptions();
+            } else {
+                console.error("Poll not found:", response.statusText);
+                poll = null;
             }
         } catch (error) {
-            console.error("Failed to fetch polls:", error);
+            console.error("Failed to fetch poll:", error);
             poll = null;
         }
-
     });
 
     onDestroy(() => {
@@ -72,30 +94,21 @@
 
     async function makeVote(optionId) {
         try {
-            const params = new URLSearchParams({
-                username: username,
-                pollId: pollId
-            });
-
-            const response = await fetch(`${baseUrl}/v1/api/vote/${optionId}?${params.toString()}`, {
-                method: 'POST',
-            });
+            const response = await fetch(
+                `${baseUrl}/v1/api/vote/${optionId}?pollId=${pollId}`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${authToken.trim()}`,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
 
             if (response.ok) {
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    const updatedOption = await response.json();
-                    const option = poll.options[optionId];
-
-                    if (option) {
-                        option.votes.push(updatedOption);
-                        userVote = option.id;
-                    } else {
-                        console.error("Option not found:", optionId);
-                    }
-
-                    poll = {...poll};
-                }
+                await fetchVoteOptions();
+                userVote = optionId;
+                poll = { ...poll };
             } else {
                 console.error("Failed to vote:", response.statusText);
             }
@@ -106,34 +119,19 @@
 
     async function removeVote(optionId) {
         try {
-            const params = new URLSearchParams({
-                username: username,
-                pollId: pollId
-            });
-
-            const response = await fetch(`${baseUrl}/v1/api/vote/${optionId}?${params.toString()}`, {
-                method: 'DELETE',
-            });
+            const response = await fetch(
+                `${baseUrl}/v1/api/vote/${optionId}?pollId=${pollId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                },
+            );
 
             if (response.ok) {
-                let option = poll.options[optionId];
-                if (option) {
-                    option = {
-                        ...option,
-                        votes: option.votes.filter(vote => vote.user.username !== username),
-                    };
-
-
-                    poll = {
-                        ...poll,
-                        options: {
-                            ...poll.options,
-                            [optionId]: option
-                        }
-                    };
-                    userVote = null;
-                }
-
+                userVote = null;
+                await fetchVoteOptions();
             } else {
                 console.error("Failed to remove vote:", response.statusText);
             }
@@ -142,28 +140,39 @@
         }
     }
 
-
     function goBack() {
-        goto('/polls');
+        goto("/polls");
     }
 </script>
 
 <div class="container">
     {#if poll}
-        <div class="poll">
+        <div class="poll {isExpired ? 'expired' : ''}">
+            {#if isExpired}
+                <p class="expired-message">Expired Poll</p>
+            {/if}
             <h2>{poll.question}</h2>
             <ul class="options-list">
                 {#each Object.values(poll.options) as option (option.id)}
                     <li class="option-box">
                         <span>{option.caption}</span>
                         <div class="vote-button-container">
-                            <span class="vote-count">{option.votes?.length || 0}</span>
-                            {#if userVote === option.id }
-                                <button class="remove-vote-button" on:click={() => removeVote(option.id)}>
+                            <span class="vote-count"
+                                >{option.votes?.length || 0}</span
+                            >
+                            {#if userVote === option.id}
+                                <button
+                                    class="remove-vote-button"
+                                    on:click={() => removeVote(option.id)}
+                                >
                                     Remove Vote
                                 </button>
                             {:else}
-                                <button class="vote-button" on:click={() => makeVote(option.id)} disabled={userVote !== null}>
+                                <button
+                                    class="vote-button"
+                                    on:click={() => makeVote(option.id)}
+                                    disabled={userVote !== null || isExpired}
+                                >
                                     Vote
                                 </button>
                             {/if}
@@ -179,8 +188,6 @@
 </div>
 
 <style>
-
-
     .container {
         width: 100%;
         height: 100%;
@@ -188,7 +195,6 @@
         justify-content: center;
         align-items: flex-start;
     }
-
 
     .poll {
         background-color: #e0e0e0;
@@ -201,9 +207,23 @@
         margin-top: 40px;
     }
 
+    .poll.expired {
+        background-color: #ffcccc;
+        color: #ff0000;
+    }
+
     .options-list {
         list-style-type: none;
         padding: 0;
+    }
+
+    .expired-message {
+        font-weight: bold;
+        font-size: 2rem;
+        text-decoration: underline;
+        color: #ff0000;
+        margin-bottom: 10px;
+        text-align: center;
     }
 
     .option-box {
@@ -215,21 +235,23 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        font-size: 2rem;
     }
 
     .vote-button-container {
         display: flex;
         align-items: center;
-
     }
 
     .vote-count {
         margin-right: 10px;
-        font-size: 1.5rem;
+        font-size: 2rem;
         display: inline;
     }
 
-    .back-button, .vote-button, .remove-vote-button {
+    .back-button,
+    .vote-button,
+    .remove-vote-button {
         margin-top: 15px;
         padding: 10px;
         background-color: grey;
@@ -241,7 +263,9 @@
         font-size: 1.2rem;
     }
 
-    .back-button:hover, .vote-button:hover, .remove-vote-button {
+    .back-button:hover,
+    .vote-button:hover,
+    .remove-vote-button {
         background-color: darkgray;
     }
 

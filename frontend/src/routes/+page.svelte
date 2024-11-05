@@ -1,74 +1,66 @@
-<!-- this is the page for creating or logging in as user -->
-
+<!-- this is the page for logging in as user -->
 
 <script>
-    import { goto } from '$app/navigation';
-    import { userStore } from '$lib/store.ts';
-    import {onMount} from "svelte";
+    import { goto } from "$app/navigation";
+    import { authStore } from "$lib/store.ts";
 
-
-    let username = '';
-    let password = '';
-    let success = false;
-    let error = '';
-    let users = [];
-
+    let username = "";
+    let password = "";
+    let error = "";
     const baseUrl = "http://localhost:8080";
 
-    onMount(async () => {
+    async function signIn() {
         try {
             const response = await fetch(`${baseUrl}/v1/api/users`);
             if (response.ok) {
-                users = await response.json();
+                const { token } = await response.json();
+                authStore.setToken(token);
+                await goto("/polls");
             } else {
-                console.error("Failed to fetch users:", response.statusText);
+                error = "Invalid credentials. Please try again.";
             }
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        }
-    });
-
-    async function signIn(){
-        const existingUser = users.find(user => user.username === username);
-        if (existingUser){
-            if (existingUser.password === password){
-                success = true;
-                userStore.setUsername(existingUser.username);
-                await goto('/polls');
-            }
-            else {
-                error = "Incorrect password. Please try again.";
-            }
-        }
-        else {
-            error = "User does not exist. Create new user!"
+        } catch (err) {
+            console.error("Login error:", err);
+            error = "An error occurred. Please try again later.";
         }
     }
 
-    function goToSignUp(){
+    function goToSignUp() {
         goto("/create_user");
     }
-
-
 </script>
 
 <div class="container">
     <div class="user">
         <h2>Sign in or create user</h2>
 
-        <input type="text" bind:value={username} placeholder="Username" required />
-        <input type="password" bind:value={password} placeholder="Password" required />
+        <input
+            type="text"
+            bind:value={username}
+            placeholder="Username"
+            required
+        />
+        <input
+            type="password"
+            bind:value={password}
+            placeholder="Password"
+            required
+        />
 
         {#if error}
             <p style="color: red;">{error}</p>
         {/if}
 
         <button on:click={signIn}>Sign in</button>
-        <p>Are you new?<p>
-        <button on:click={goToSignUp} style="cursor: pointer; margin: -20px 0 0 -10px; color: blue; background: none; border: none; text-decoration: underline; text-align: left">
-            Click here to create a user.
-        </button>
-
+        <p>Are you new?</p>
+        <p>
+            <button
+                on:click={goToSignUp}
+                style="cursor: pointer; margin: -20px 0 0 -10px; color: blue; background: none; border: none; text-decoration: underline; text-align: left"
+            >
+                Click here to create a user.
+            </button>
+        </p>
     </div>
 </div>
 
@@ -105,5 +97,4 @@
         cursor: pointer;
         margin: 10px 0;
     }
-
 </style>

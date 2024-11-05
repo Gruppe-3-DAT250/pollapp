@@ -2,17 +2,31 @@
 
 
 <script>
-    import { userStore } from '$lib/store.ts';
+    import { authStore } from '$lib/store.ts';
     import { goto } from '$app/navigation';
-    import { fetchPolls } from '$lib/api';
+    import {onDestroy, onMount} from "svelte";
 
 
     let question = '';
     let validUntil = '';
     let options = [''];
     let responseMessage = '';
+    let authToken;
+    let unsubscribe;
 
     const baseUrl = "http://localhost:8080";
+
+    onMount(async () => {
+        unsubscribe = authStore.subscribe(value => {
+            authToken = value.authToken;
+        });
+    });
+
+    onDestroy(() => {
+        if (unsubscribe) {
+            unsubscribe();
+        }
+    });
 
     function addOption() {
         options = [...options, ''];
@@ -38,23 +52,17 @@
             }, {})
         };
 
-
-        const params = new URLSearchParams({
-            username: $userStore
-        });
-        const url = `${baseUrl}/v1/api/polls/create_poll?${params.toString()}`;
-
-        const response = await fetch(url, {
+        const response = await fetch(`${baseUrl}/v1/api/polls/create_poll`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                'Authorization': `Bearer ${authToken}`,
             },
             body: JSON.stringify(pollData)
         })
 
         if (response.ok){
             responseMessage = "Poll created!"
-            await fetchPolls();
             await goto('/polls');
         }
         else{
