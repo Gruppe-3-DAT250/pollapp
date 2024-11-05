@@ -11,7 +11,7 @@
 
     async function signIn() {
         try {
-            const response = await fetch(`${baseUrl}/v1/api/users`);
+            const response = await fetch(`${baseUrl}/v1/api/user/signIn`);
             if (response.ok) {
                 const { token } = await response.json();
                 authStore.setToken(token);

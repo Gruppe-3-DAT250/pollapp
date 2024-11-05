@@ -30,7 +30,7 @@
         };
 
         try {
-            const response = await fetch(`${baseUrl}/v1/api/users`, {
+            const response = await fetch(`${baseUrl}/v1/api/user`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -132,4 +132,3 @@
         margin: 10px 0;
     }
 </style>
-
