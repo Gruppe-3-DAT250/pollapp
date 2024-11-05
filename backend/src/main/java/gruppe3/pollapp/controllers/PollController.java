@@ -58,8 +58,7 @@ public class PollController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String token = authToken.startsWith("Bearer ") ? authToken.substring(7) : authToken;
-        String username = authenticationService.extractUsernameFromToken(token);
+        String username = authenticationService.extractUsernameFromToken(authToken);
         User user = manager.getUser(username);
         Long user_id = user.getId();
         poll.setCreator_id(user_id);
