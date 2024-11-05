@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // https://docs.spring.io/spring-data/jpa/reference/repositories/query-keywords-reference.html
     User save(User user);
 
-    Optional<User> findById(long id);
+    User findById(long id);
 
     User findByUsername(String username);
 }

@@ -11,7 +11,17 @@
 
     async function signIn() {
         try {
-            const response = await fetch(`${baseUrl}/v1/api/user/signIn`);
+            const response = await fetch(`${baseUrl}/v1/api/user/signIn`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                }),
+            });
+
             if (response.ok) {
                 const { token } = await response.json();
                 authStore.setToken(token);
