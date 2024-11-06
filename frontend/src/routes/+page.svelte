@@ -10,18 +10,26 @@
     let error = '';
     const baseUrl = "http://localhost:8080";
 
-
+    function sanitize(value) {
+        return value.replace(/[&<>"'`=\/]/g, (character) => {
+            return `&#${character.charCodeAt(0)};`;
+        });
+    }
 
     async function signIn() {
         try {
+            // Sanitize user inputs
+            const sanitizedUsername = sanitize(username);
+            const sanitizedPassword = sanitize(password);
+
             const response = await fetch(`${baseUrl}/v1/api/user/signIn`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    username: username,
-                    password: password,
+                    username: sanitizedUsername,
+                    password: sanitizedPassword,
                 }),
             });
 
