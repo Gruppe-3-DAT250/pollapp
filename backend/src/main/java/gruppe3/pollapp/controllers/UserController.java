@@ -25,9 +25,6 @@ public class UserController {
 
     private final DomainManager domainManager;
 
-    @Autowired
-    private UserRepository userRepository;
-
     public UserController(@Autowired DomainManager domainManager) {
         this.domainManager = domainManager;
     }
@@ -37,20 +34,22 @@ public class UserController {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        // return ResponseEntity.ok(userRepository.findAll()); // Til database
         return ResponseEntity.ok(domainManager.getAllUsers()); // Til lokal mock data
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
-        // return ResponseEntity.ok(userRepository.findById(id));
-        return ResponseEntity.ok(domainManager.getUser(id));
+        try {
+            return ResponseEntity.ok(domainManager.getUser(id));
+        }
+        catch(Exception e){
+            return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).build();
+        }
     }
 
     @PostMapping("/create_user")
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
-            // User createdUser = userRepository.save(user);
             User createdUser = domainManager.createUser(user.getUsername(), user.getEmail(), user.getPassword());
 
             String token = authenticationService.generateToken(createdUser);

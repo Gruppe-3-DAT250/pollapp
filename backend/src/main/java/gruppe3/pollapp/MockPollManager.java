@@ -4,20 +4,23 @@ import gruppe3.pollapp.domain.Poll;
 import gruppe3.pollapp.domain.User;
 import gruppe3.pollapp.domain.Vote;
 import gruppe3.pollapp.domain.VoteOption;
+
 import org.springframework.stereotype.Repository;
+import org.springframework.context.annotation.Primary;
 
 import java.time.Instant;
 import java.util.*;
 
 @Repository
-public class PollManager implements DomainManager{
+// @Primary
+public class MockPollManager implements DomainManager {
     private final HashMap<Long, User> users = new HashMap<>();
-    private final Map<Long, Poll> polls = new HashMap<>();
+    private final Map<String, Poll> polls = new HashMap<>();
 
     private Long idCounter_user = 0L;
     private Long idCounter_poll = 0L;
 
-    public PollManager() {
+    public MockPollManager() {
         initializeMockData();
     }
 
@@ -42,8 +45,8 @@ public class PollManager implements DomainManager{
         option2.setVotes(new ArrayList<>());
 
         Map<Integer, VoteOption> options = new HashMap<>();
-        options.put(0,option1);
-        options.put(1,option2);
+        options.put(0, option1);
+        options.put(1, option2);
 
         poll1.setOptions(options);
 
@@ -77,7 +80,6 @@ public class PollManager implements DomainManager{
 
         poll2.setOptions(options_poll2);
 
-
         addPoll(poll2);
     }
 
@@ -110,7 +112,7 @@ public class PollManager implements DomainManager{
 
     @Override
     public List<User> getAllUsers() {
-        return  new ArrayList<User>(users.values());
+        return new ArrayList<User>(users.values());
     }
 
     @Override
@@ -119,24 +121,26 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public Collection<Poll> getPolls(){
+    public Collection<Poll> getPolls() {
         return polls.values();
     }
 
     @Override
-    public Poll getPoll(Long id){
+    public Poll getPoll(String id) {
         return polls.get(id);
     }
 
     @Override
-    public void addPoll(Poll poll){
-        polls.put(idCounter_poll, poll);
-        poll.setId(idCounter_poll);
+    public void addPoll(Poll poll) {
+        // String id = "aaaaaaaaaaaaaaaaaaaaaaa" + idCounter_poll.toString();
+        String id = idCounter_poll.toString();
+        polls.put(id, poll);
+        poll.setId(id);
         idCounter_poll++;
     }
 
     @Override
-    public Vote makeVote(String username, Long pollId, Integer optionId){
+    public Vote makeVote(String username, String pollId, Integer optionId) {
         User user = getUser(username);
         Poll poll = polls.get(pollId);
         if (user == null || poll == null) {
@@ -156,7 +160,7 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public boolean deleteVote(String username, Long pollId, Integer optionId) {
+    public boolean deleteVote(String username, String pollId, Integer optionId) {
         User user = getUser(username);
         Poll poll = polls.get(pollId);
         if (user == null || poll == null) {
@@ -183,7 +187,7 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public Integer getUserVoteOption(String username, Long pollId) {
+    public Integer getUserVoteOption(String username, String pollId) {
         Poll poll = polls.get(pollId);
 
         for (VoteOption option : poll.getOptions().values()) {
@@ -198,10 +202,9 @@ public class PollManager implements DomainManager{
     }
 
     @Override
-    public Collection<VoteOption> getVoteOptionsByPollId(Long pollId) {
+    public Collection<VoteOption> getVoteOptionsByPollId(String pollId) {
         Poll poll = polls.get(pollId);
         return poll.getOptions().values();
     }
-
 
 }

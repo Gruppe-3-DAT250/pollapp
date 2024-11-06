@@ -1,6 +1,6 @@
 package gruppe3.pollapp.controllers;
 
-import gruppe3.pollapp.PollManager;
+import gruppe3.pollapp.DomainManager;
 import gruppe3.pollapp.domain.Poll;
 import gruppe3.pollapp.domain.User;
 import gruppe3.pollapp.login.AuthenticationService;
@@ -22,10 +22,10 @@ public class PollController {
     @Autowired
     private AuthenticationService authenticationService;
 
-    private final PollManager manager;
+    private final DomainManager domainManager;
 
-    public PollController(@Autowired PollManager manager) {
-        this.manager = manager;
+    public PollController(@Autowired DomainManager domainManager) {
+        this.domainManager = domainManager;
     }
 
     @GetMapping("/get_polls")
@@ -34,17 +34,18 @@ public class PollController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Collection<Poll> pollsForFrontend = manager.getPolls();
+        Collection<Poll> pollsForFrontend = domainManager.getPolls();
         return ResponseEntity.ok(pollsForFrontend);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Poll> getPollById(@PathVariable Long id, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<Poll> getPollById(@PathVariable String id, @RequestHeader("Authorization") String authToken) {
+        System.out.println(id);
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Poll poll = manager.getPoll(id);
+        Poll poll = domainManager.getPoll(id);
         if (poll != null) {
             return ResponseEntity.ok(poll);
         } else {
@@ -59,10 +60,10 @@ public class PollController {
         }
 
         String username = authenticationService.extractUsernameFromToken(authToken);
-        User user = manager.getUser(username);
+        User user = domainManager.getUser(username);
         Long user_id = user.getId();
         poll.setCreator_id(user_id);
-        manager.addPoll(poll);
+        domainManager.addPoll(poll);
         return ResponseEntity.ok(poll);
     }
 

@@ -30,7 +30,7 @@ public class VoteOptionController {
 
 
     @GetMapping("/{pollId}/options")
-    public ResponseEntity<Collection<VoteOption>> getVoteOptions(@PathVariable Long pollId, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<Collection<VoteOption>> getVoteOptions(@PathVariable String pollId, @RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

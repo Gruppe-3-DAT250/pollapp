@@ -13,7 +13,7 @@
     let unsubscribe;
     let isExpired;
 
-    $: pollId = $page.params.id ? parseInt($page.params.id) : null;
+    $: pollId = $page.params.id ? $page.params.id : null;
 
     const baseUrl = "http://localhost:8080";
 

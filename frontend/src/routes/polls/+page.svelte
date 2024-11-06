@@ -1,11 +1,9 @@
-
 <!-- this is the page for showing all polls -->
 
 <script>
-    import {onMount} from 'svelte';
-    import {goto} from '$app/navigation';
-    import {authStore} from "$lib/store.ts";
-
+    import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
+    import { authStore } from "$lib/store.ts";
 
     let activePolls = [];
     let expiredPolls = [];
@@ -20,7 +18,7 @@
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}`,
+                Authorization: `Bearer ${authToken}`,
             },
         });
 
@@ -35,7 +33,7 @@
 
     onMount(async () => {
         try {
-            unsubscribe = authStore.subscribe(value => {
+            unsubscribe = authStore.subscribe((value) => {
                 authToken = value.authToken;
             });
 
@@ -43,13 +41,15 @@
 
             const now = new Date();
             activePolls = allPolls
-                .filter(poll => new Date(poll.validUntil) >= now)
-                .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+                .filter((poll) => new Date(poll.validUntil) >= now)
+                .sort(
+                    (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt),
+                );
             expiredPolls = allPolls
-                .filter(poll => new Date(poll.validUntil) < now)
-                .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-
-
+                .filter((poll) => new Date(poll.validUntil) < now)
+                .sort(
+                    (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt),
+                );
         } catch (error) {
             console.error("Failed to fetch polls:", error);
         }
@@ -58,14 +58,13 @@
     function selectPoll(id) {
         goto(`/polls/${id}`);
     }
-
-
 </script>
-
 
 <div class="nav-bar">
     <a href="/polls" class="nav-item active">Polls</a>
-    <a href="/polls/create_poll" style="cursor: pointer;" class="nav-item">Create Poll</a>
+    <a href="/polls/create_poll" style="cursor: pointer;" class="nav-item"
+        >Create Poll</a
+    >
 </div>
 
 <div class="container">
@@ -75,7 +74,10 @@
             {#each activePolls as poll}
                 <div class="poll-box">
                     <h1>{poll.question}</h1>
-                    <button on:click={() => selectPoll(poll.id)} class="choose-button">Choose Poll</button>
+                    <button
+                        on:click={() => selectPoll(poll.id)}
+                        class="choose-button">Choose Poll</button
+                    >
                 </div>
             {/each}
         {:else}
@@ -87,7 +89,10 @@
             {#each expiredPolls as poll}
                 <div class="poll-box expired">
                     <h1>{poll.question}</h1>
-                    <button on:click={() => selectPoll(poll.id)} class="choose-button">View Poll</button>
+                    <button
+                        on:click={() => selectPoll(poll.id)}
+                        class="choose-button">View Poll</button
+                    >
                 </div>
             {/each}
         {:else}
@@ -199,5 +204,4 @@
         background-color: #ffcccc;
         color: #ff0000;
     }
-
 </style>

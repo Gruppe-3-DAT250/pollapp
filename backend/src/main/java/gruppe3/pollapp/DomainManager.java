@@ -25,16 +25,16 @@ public interface DomainManager {
 
     Collection<Poll> getPolls();
 
-    Poll getPoll(Long id);
+    Poll getPoll(String id);
 
     void addPoll(Poll poll);
 
-    Vote makeVote(String username, Long pollId, Integer optionId) throws Exception;
+    Vote makeVote(String username, String pollId, Integer optionId) throws Exception;
 
-    boolean deleteVote(String username, Long pollId, Integer optionId);
+    boolean deleteVote(String username, String pollId, Integer optionId);
 
-    Integer getUserVoteOption(String username, Long pollId);
+    Integer getUserVoteOption(String username, String pollId);
 
-    Collection<VoteOption> getVoteOptionsByPollId(Long pollId);
+    Collection<VoteOption> getVoteOptionsByPollId(String pollId);
 
 }

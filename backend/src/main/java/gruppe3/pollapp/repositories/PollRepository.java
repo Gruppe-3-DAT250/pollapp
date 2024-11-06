@@ -2,11 +2,11 @@ package gruppe3.pollapp.repositories;
 
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-import gruppe3.pollapp.domain.User;
+import gruppe3.pollapp.domain.Poll;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface PollRepository extends MongoRepository<Poll, String> {
 
     // Sjekk ut:
     // https://docs.spring.io/spring-data/jpa/reference/jpa/getting-started.html
@@ -15,9 +15,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // til queries.
     // Les mulige metodenavn her:
     // https://docs.spring.io/spring-data/jpa/reference/repositories/query-keywords-reference.html
-    User save(User user);
-
-    <Optional>User findById(long id);
-
-    User findByUsername(String username);
+    Poll save(Poll poll);
 }

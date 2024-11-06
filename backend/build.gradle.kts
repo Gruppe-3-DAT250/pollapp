@@ -58,8 +58,8 @@ apply(plugin = "docker-compose")
 
 dockerCompose {
     useComposeFiles = listOf("docker-compose.dev.yml")
-    startedServices = listOf("postgres")
-    // startedServices = listOf("postgres, mongo") // TODO: uncomment this when mongo is in place
+    // startedServices = listOf("postgres")
+    startedServices = listOf("postgres", "mongo") // TODO: uncomment this when mongo is in place
 
     stopContainers = true
     removeContainers = true

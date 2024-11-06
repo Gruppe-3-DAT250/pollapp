@@ -1,5 +1,7 @@
 package gruppe3.pollapp.domain;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.time.Instant;
@@ -7,9 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Document
 public class Poll {
 
-    private Long id;
+    @Id
+    private String id;
     private String question;
     private Instant publishedAt;
     private Instant validUntil;
@@ -59,11 +63,11 @@ public class Poll {
         }
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
