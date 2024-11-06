@@ -136,6 +136,11 @@ public class PollManager implements DomainManager{
     }
 
     @Override
+    public void deletePoll(Long id){
+        polls.remove(id);
+    }
+
+    @Override
     public Vote makeVote(String username, Long pollId, Integer optionId){
         User user = getUser(username);
         Poll poll = polls.get(pollId);

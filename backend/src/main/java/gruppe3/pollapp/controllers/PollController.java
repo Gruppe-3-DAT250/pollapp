@@ -66,4 +66,13 @@ public class PollController {
         return ResponseEntity.ok(poll);
     }
 
+
+    @DeleteMapping("/{pollId}")
+    public ResponseEntity<String> deletePoll(@PathVariable Long pollId, @RequestHeader("Authorization") String authToken) {
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        manager.deletePoll(pollId);
+        return ResponseEntity.ok("Poll deleted");
+    }
 }

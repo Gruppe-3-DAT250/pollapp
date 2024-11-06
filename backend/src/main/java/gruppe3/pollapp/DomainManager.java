@@ -28,6 +28,8 @@ public interface DomainManager {
 
     void addPoll(Poll poll);
 
+    void deletePoll(Long id);
+
     Vote makeVote(String username, Long pollId, Integer optionId) throws Exception;
 
     boolean deleteVote(String username, Long pollId, Integer optionId);
