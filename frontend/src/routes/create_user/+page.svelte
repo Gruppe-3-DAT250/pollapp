@@ -11,7 +11,7 @@
     let email = '';
     let error = '';
 
-    const baseUrl = "http://localhost:8080";
+    const baseUrl = "http://localhost";
 
     async function createUser() {
         // add function to check if username is taken

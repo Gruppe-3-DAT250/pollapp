@@ -14,7 +14,7 @@
     let authToken;
     let unsubscribe;
 
-    const baseUrl = "http://localhost:8080";
+    const baseUrl = "http://localhost";
 
     onMount(async () => {
         unsubscribe = authStore.subscribe(value => {

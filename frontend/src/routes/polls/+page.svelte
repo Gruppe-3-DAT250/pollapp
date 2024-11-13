@@ -13,7 +13,7 @@
     let authToken;
 
     async function fetchPolls() {
-        const baseUrl = "http://localhost:8080";
+        const baseUrl = "http://localhost";
         const url = `${baseUrl}/v1/api/polls/get_polls`;
 
         const response = await fetch(url, {

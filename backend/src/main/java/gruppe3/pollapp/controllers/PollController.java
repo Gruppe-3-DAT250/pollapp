@@ -29,7 +29,8 @@ public class PollController {
     }
 
     @GetMapping("/get_polls")
-    public ResponseEntity<Collection<Poll>> getPolls(@RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<Collection<Poll>> getPolls(@RequestHeader("Authorization") String authToken) throws InterruptedException {
+        Thread.sleep(3000);
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
