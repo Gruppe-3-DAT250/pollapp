@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
@@ -145,6 +146,7 @@ public class PersistentPollManager implements DomainManager {
     }
 
     @Override
+    @Transactional
     public Vote makeVote(String username, String pollId, Integer optionId) {
         User user = getUser(username);
         Poll poll = getPoll(pollId);
@@ -157,10 +159,10 @@ public class PersistentPollManager implements DomainManager {
             return null;
         }
 
-        Vote vote = new Vote();
-        vote.setVoteOption(option);
-        vote.setUser(user);
-        option.addVote(vote);
+        Vote vote = poll.addVote(user, optionId);
+
+        // pollRepository.save(poll); // FIXME: Her går det gale
+
         return vote;
     }
 
@@ -168,6 +170,8 @@ public class PersistentPollManager implements DomainManager {
     public boolean deleteVote(String username, String pollId, Integer optionId) {
         User user = getUser(username);
         Poll poll = getPoll(pollId);
+        System.out.println("username " + username);
+        System.out.println("pollId " + pollId);
         if (user == null || poll == null) {
             return false;
         }

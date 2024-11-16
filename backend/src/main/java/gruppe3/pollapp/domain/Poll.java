@@ -52,6 +52,10 @@ public class Poll {
         return options;
     }
 
+    public VoteOption getOption(Integer optionId){
+        return this.getOptions().get(optionId);
+    }
+
     public void setOptions(Map<Integer, VoteOption> options) {
         this.options = options;
     }
@@ -77,5 +81,13 @@ public class Poll {
 
     public void setCreator_id(Long creator_id) {
         this.creator_id = creator_id;
+    }
+    public Vote addVote(User user, Integer optionId){
+        VoteOption option = this.getOption(optionId);
+        Vote vote = new Vote();
+        vote.setUser(user);
+        vote.setVoteOption(option);
+        option.addVote(vote);
+        return vote;
     }
 }
