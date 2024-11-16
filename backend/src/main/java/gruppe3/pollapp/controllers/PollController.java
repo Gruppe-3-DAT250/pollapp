@@ -3,6 +3,7 @@ package gruppe3.pollapp.controllers;
 import gruppe3.pollapp.DomainManager;
 import gruppe3.pollapp.domain.Poll;
 import gruppe3.pollapp.domain.User;
+import gruppe3.pollapp.domain.VoteOption;
 import gruppe3.pollapp.login.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,16 @@ public class PollController {
         poll.setCreator_id(user_id);
         domainManager.addPoll(poll);
         return ResponseEntity.ok(poll);
+    }
+
+    @GetMapping("/{pollId}/options")
+    public ResponseEntity<Collection<VoteOption>> getVoteOptions(@PathVariable String pollId, @RequestHeader("Authorization") String authToken) {
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Collection<VoteOption> options = domainManager.getVoteOptionsByPollId(pollId);
+        return ResponseEntity.ok(options);
     }
 
 }

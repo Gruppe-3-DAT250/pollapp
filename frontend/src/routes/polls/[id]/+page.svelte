@@ -20,7 +20,7 @@
     async function fetchVoteOptions() {
         try {
             const response = await fetch(
-                `${baseUrl}/v1/api/voteOption/${pollId}/options`,
+                `${baseUrl}/v1/api/${pollId}/options`,
                 {
                     method: "GET",
                     headers: {
