@@ -5,6 +5,7 @@
     import { userStore } from '$lib/store.js';
     import pollsData from '../../../data/fake_polls.json';
     import { goto } from '$app/navigation';
+  import { handleEvents } from '$lib/handleEvents';
 
     let question = '';
     let options = [''];
@@ -33,6 +34,10 @@
         console.log("Poll created:", pollData);
         responseMessage = "Poll created!";
         // must be connected to api
+        handleEvents('createPoll', {
+            username: $userStore.username,
+            pollData: pollData
+        });
     }
 
 
