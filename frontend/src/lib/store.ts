@@ -7,8 +7,7 @@ function createAuthStore() {
 
     return {
         subscribe,
-        // @ts-ignore
-        setToken: (token) => {
+        setToken: (token:string) => {
             set({ authToken: token });
             if (typeof window !== 'undefined') {
                 localStorage.setItem('authToken', token);

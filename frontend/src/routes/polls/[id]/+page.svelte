@@ -1,10 +1,12 @@
+
 <!-- this is the page for showing individual polls. -->
 
-<script>
-    import { onDestroy, onMount } from "svelte";
-    import { goto } from "$app/navigation";
-    import { page } from "$app/stores";
-    import { authStore } from "$lib/store.ts";
+<script lang="ts">
+    import {onDestroy, onMount} from 'svelte';
+    import {goto} from '$app/navigation';
+    import {page} from '$app/stores';
+    import {authStore} from '$lib/store';
+
 
     let poll = null;
     let pollId;
@@ -12,10 +14,13 @@
     let userVote = null;
     let unsubscribe;
     let isExpired;
+    let userId: number;
 
-    $: pollId = $page.params.id ? $page.params.id : null;
+
+    $: pollId = $page.params.id ? parseInt($page.params.id) : null;
 
     const baseUrl = "http://localhost:8080";
+
 
     async function fetchVoteOptions() {
         try {
@@ -47,6 +52,8 @@
         });
 
         try {
+            await fetchUserId();
+
             const response = await fetch(`${baseUrl}/v1/api/polls/${pollId}`, {
                 method: "GET",
                 headers: {
@@ -132,6 +139,7 @@
             if (response.ok) {
                 userVote = null;
                 await fetchVoteOptions();
+
             } else {
                 console.error("Failed to remove vote:", response.statusText);
             }
@@ -140,9 +148,53 @@
         }
     }
 
+    async function deletePoll() {
+        const confirmDelete = window.confirm("Are you sure you want to delete this poll?");
+        if (confirmDelete) {
+            try {
+                const response = await fetch(`${baseUrl}/v1/api/polls/${pollId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                    },
+                });
+
+                if (response.ok) {
+                    console.log("Poll deleted successfully.");
+                    goto('/polls');
+                } else {
+                    console.error("Failed to delete poll:", response.statusText);
+                }
+            } catch (error) {
+                console.error("Error deleting poll:", error);
+            }
+        }
+    }
+
+    async function fetchUserId() {
+        const baseUrl = "http://localhost:8080";
+        const url = `${baseUrl}/v1/api/user/getId`;
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`,
+            },
+        });
+
+        if (response.ok) {
+            userId = await response.json();
+        } else {
+            const error = await response.json();
+            console.error("Error fetching user ID:", error.message);
+            throw new Error(error.message);
+        }
+    }
+
     function goBack() {
         goto("/polls");
     }
+
 </script>
 
 <div class="container">
@@ -181,6 +233,10 @@
                 {/each}
             </ul>
             <button on:click={goBack} class="back-button">Back to Polls</button>
+
+            {#if parseInt(poll.creator_id) === parseInt(userId)}
+                <button on:click={deletePoll} class="delete-button" >Delete Poll</button>
+            {/if}
         </div>
     {:else}
         <p>Poll not found.</p>
@@ -188,6 +244,8 @@
 </div>
 
 <style>
+
+
     .container {
         width: 100%;
         height: 100%;
@@ -195,6 +253,7 @@
         justify-content: center;
         align-items: flex-start;
     }
+
 
     .poll {
         background-color: #e0e0e0;
@@ -241,6 +300,7 @@
     .vote-button-container {
         display: flex;
         align-items: center;
+
     }
 
     .vote-count {
@@ -249,9 +309,7 @@
         display: inline;
     }
 
-    .back-button,
-    .vote-button,
-    .remove-vote-button {
+    .delete-button, .back-button, .vote-button, .remove-vote-button {
         margin-top: 15px;
         padding: 10px;
         background-color: grey;
@@ -263,9 +321,12 @@
         font-size: 1.2rem;
     }
 
-    .back-button:hover,
-    .vote-button:hover,
-    .remove-vote-button {
+    .delete-button {
+        background-color: #ff0000;
+        width: auto;
+    }
+
+    .back-button:hover, .vote-button:hover, .remove-vote-button {
         background-color: darkgray;
     }
 

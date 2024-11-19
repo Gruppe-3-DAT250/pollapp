@@ -47,6 +47,18 @@ public class UserController {
         }
     }
 
+    @GetMapping("/getId")
+    public ResponseEntity<Long> getUserId(@RequestHeader("Authorization") String authToken) {
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String username = authenticationService.extractUsernameFromToken(authToken);
+        User user = domainManager.getUser(username);
+        Long user_id = user.getId();
+
+        return ResponseEntity.ok(user_id);
+    }
+
     @PostMapping("/create_user")
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
