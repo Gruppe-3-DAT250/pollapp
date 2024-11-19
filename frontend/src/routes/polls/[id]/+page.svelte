@@ -20,7 +20,7 @@
     async function fetchVoteOptions() {
         try {
             const response = await fetch(
-                `${baseUrl}/v1/api/${pollId}/options`,
+                `${baseUrl}/v1/api/polls/${pollId}/options`,
                 {
                     method: "GET",
                     headers: {
@@ -153,7 +153,7 @@
             {/if}
             <h2>{poll.question}</h2>
             <ul class="options-list">
-                {#each Object.values(poll.options) as option (option.id)}
+                {#each poll.options as option (option.id)}
                     <li class="option-box">
                         <span>{option.caption}</span>
                         <div class="vote-button-container">
