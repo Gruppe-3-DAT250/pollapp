@@ -32,11 +32,12 @@ public interface DomainManager {
     void addVoteOptions(Collection<VoteOption> options);
 
     Vote makeVote(String username, Long optionId) throws Exception;
+
     void deletePoll(Long id);
 
-    Vote makeVote(String username, Long pollId, Integer optionId) throws Exception;
+    void deleteVoteOptions(Poll poll);
 
-    boolean deleteVote(String username, Long pollId, Integer optionId);
+    boolean deleteVote(String username, Long optionId);
 
     Long getUserVoteOptionId(String username, Long pollId);
 

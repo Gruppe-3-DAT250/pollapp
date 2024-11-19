@@ -41,7 +41,6 @@ public class PollController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Poll> getPollById(@PathVariable Long id, @RequestHeader("Authorization") String authToken) {
-        System.out.println(id);
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -84,7 +83,8 @@ public class PollController {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        manager.deletePoll(pollId);
+        domainManager.deleteVoteOptions(domainManager.getPoll(pollId));
+        domainManager.deletePoll(pollId);
         return ResponseEntity.ok("Poll deleted");
     }
 }

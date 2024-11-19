@@ -9,4 +9,6 @@ import gruppe3.pollapp.domain.Poll;
 public interface PollRepository extends JpaRepository<Poll, Long> {
 
     Poll save(Poll poll);
+
+    void deleteById(Long id);
 }

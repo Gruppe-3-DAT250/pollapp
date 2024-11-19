@@ -92,7 +92,6 @@ public class UserController {
         User user = domainManager.getUser(loginRequest.getUsername());
         if (user != null && user.getPassword().equals(loginRequest.getPassword())) {
             String token = authenticationService.generateToken(user);
-            System.out.println(token);
             return ResponseEntity.ok(new LoginResponse(token));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user");

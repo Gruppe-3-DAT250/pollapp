@@ -15,4 +15,6 @@ public interface VoteOptionRepository extends JpaRepository<VoteOption, Long> {
     VoteOption save(VoteOption voteOption);
 
     List<VoteOption> findByPoll(Poll poll);
+
+    void deleteByPoll(Poll poll);
 }

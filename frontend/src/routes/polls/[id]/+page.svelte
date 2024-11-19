@@ -234,7 +234,7 @@
             </ul>
             <button on:click={goBack} class="back-button">Back to Polls</button>
 
-            {#if parseInt(poll.creator_id) === parseInt(userId)}
+            {#if parseInt(poll.owner.id) === parseInt(userId)}
                 <button on:click={deletePoll} class="delete-button" >Delete Poll</button>
             {/if}
         </div>

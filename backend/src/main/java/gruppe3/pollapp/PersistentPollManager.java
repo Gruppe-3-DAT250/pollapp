@@ -12,6 +12,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,12 +41,13 @@ public class PersistentPollManager implements DomainManager {
 
     @PostConstruct
     private void initializeMockData() {
-        createUser("user1", "password", "user@example.com");
+        User user = createUser("user1", "password", "user@example.com");
 
         Poll poll1 = new Poll();
         poll1.setQuestion("What's your favorite programming language?");
         poll1.setPublishedAt(Instant.now());
         poll1.setValidUntil(Instant.now().plusSeconds(86400));
+        poll1.setOwner(user);
 
         addPoll(poll1);
 
@@ -170,6 +172,18 @@ public class PersistentPollManager implements DomainManager {
         voteRepository.save(vote);
 
         return vote;
+    }
+
+    @Override
+    @Transactional
+    public void deletePoll(Long id) {
+        pollRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void deleteVoteOptions(Poll poll){
+        voteOptionRepository.deleteByPoll(poll);
     }
 
     @Override
