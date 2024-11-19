@@ -30,7 +30,6 @@ extra["snippetsDir"] = file("build/generated-snippets")
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-web-services")
     implementation("org.springframework.amqp:spring-rabbit-stream")
@@ -47,7 +46,6 @@ dependencies {
     testImplementation("org.springframework.amqp:spring-rabbit-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:mongodb")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.testcontainers:rabbitmq")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -58,8 +56,7 @@ apply(plugin = "docker-compose")
 
 dockerCompose {
     useComposeFiles = listOf("docker-compose.dev.yml")
-    // startedServices = listOf("postgres")
-    startedServices = listOf("postgres", "mongo") // TODO: uncomment this when mongo is in place
+    startedServices = listOf("postgres")
 
     stopContainers = true
     removeContainers = true

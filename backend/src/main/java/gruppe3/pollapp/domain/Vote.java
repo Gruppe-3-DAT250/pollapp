@@ -3,16 +3,40 @@ package gruppe3.pollapp.domain;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.time.Instant;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class Vote {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private Instant publishedAt;
+
+    @ManyToOne
     private User user;
 
     @JsonBackReference
+    @ManyToOne
     private VoteOption voteOption;
 
     public Vote() {
 
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Instant getPublishedAt() {

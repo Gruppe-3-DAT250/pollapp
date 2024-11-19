@@ -22,31 +22,32 @@ public class VoteController {
 
     private final DomainManager domainManager;
 
-    public VoteController(@Autowired DomainManager domainManager){
+    public VoteController(@Autowired DomainManager domainManager) {
         this.domainManager = domainManager;
     }
 
     @PostMapping("/{optionId}")
-    public ResponseEntity<Vote> makeVote(@RequestParam String pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) throws Exception {
+    public ResponseEntity<Vote> makeVote(@RequestParam Long pollId, @PathVariable Long optionId,
+            @RequestHeader("Authorization") String authToken) throws Exception {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         String username = authenticationService.extractUsernameFromToken(authToken);
-        Vote vote = domainManager.makeVote(username,pollId,optionId);
+        Vote vote = domainManager.makeVote(username, optionId);
 
         return ResponseEntity.ok(vote);
     }
 
-
     @DeleteMapping("/{optionId}")
-    public ResponseEntity<String> deleteVote(@RequestParam String pollId, @PathVariable Integer optionId, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<String> deleteVote(@RequestParam Long pollId, @PathVariable Long optionId,
+            @RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         String username = authenticationService.extractUsernameFromToken(authToken);
-        boolean isDeleted = domainManager.deleteVote(username, pollId, optionId);
+        boolean isDeleted = domainManager.deleteVote(username, optionId);
         if (isDeleted) {
             return ResponseEntity.ok("Vote deleted successfully");
         } else {
@@ -55,7 +56,8 @@ public class VoteController {
     }
 
     @GetMapping("/hasVoted")
-    public ResponseEntity<Integer> hasUserVoted(@RequestParam String pollId, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<Long> hasUserVoted(@RequestParam Long pollId,
+            @RequestHeader("Authorization") String authToken) {
 
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -67,16 +69,12 @@ public class VoteController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Integer voteOptionId = domainManager.getUserVoteOption(username, pollId);
-        if (voteOptionId == null){
+        Long voteOptionId = domainManager.getUserVoteOptionId(username, pollId);
+        if (voteOptionId == null) {
             return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(voteOptionId);
     }
-
-
-
-
 
 }

@@ -40,7 +40,7 @@ public class PollController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Poll> getPollById(@PathVariable String id, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<Poll> getPollById(@PathVariable Long id, @RequestHeader("Authorization") String authToken) {
         System.out.println(id);
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -62,14 +62,14 @@ public class PollController {
 
         String username = authenticationService.extractUsernameFromToken(authToken);
         User user = domainManager.getUser(username);
-        Long user_id = user.getId();
-        poll.setCreator_id(user_id);
+        poll.setOwner(user);
         domainManager.addPoll(poll);
         return ResponseEntity.ok(poll);
     }
 
     @GetMapping("/{pollId}/options")
-    public ResponseEntity<Collection<VoteOption>> getVoteOptions(@PathVariable String pollId, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<Collection<VoteOption>> getVoteOptions(@PathVariable Long pollId,
+            @RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
