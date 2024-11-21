@@ -1,22 +1,28 @@
 package gruppe3.pollapp;
 
 
+import gruppe3.pollapp.domain.Poll;
 import gruppe3.pollapp.domain.User;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
 
 @Component
 public interface DomainManager {
 
-    public void createUser(String username, String password);
+    User createUser(String username, String password, String email);
 
-    public User getUser(Integer id);
+    User getUser(Integer id);
 
-    public List<User> getAllUsers();
+    List<User> getAllUsers();
 
+    void deleteUser(Integer id);
 
+    User verifyUser(String username, String email);
 
+    User getUserByUsername(String username);
 
+    List<Poll> getPolls();
+
+    void addPoll(Integer id, Poll poll);
 }

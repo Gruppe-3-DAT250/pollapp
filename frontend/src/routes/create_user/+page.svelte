@@ -11,15 +11,17 @@
     let success = false;
     let error = '';
 
+    const baseUrl = "http://localhost:8080";
+
     async function createUser() {
         const existingUser = users.find(user => user.username === username);
         if (existingUser){
             error = "Username taken. Log in or try again."
         }
         else{
-            if (password === checkPassword){
+            if (password === checkPassword) {
                 const newUser = {
-                    username : username,
+                    username: username,
                     email: email,
                     password: password,
                     polls: [],
@@ -27,14 +29,28 @@
                     createdAt: new Date().toISOString(),
                 };
 
-                users.push(newUser);
-                success = true;
-                userStore.set(username);
-                goto('/polls')
-            }
+                try {
+                    const response = await fetch(`${baseUrl}/v1/api/user/create_user`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(newUser)
+                    });
 
-            else{
-                error = "Passwords doesn't match"
+                    if (response.ok) {
+                        success = true;
+                        userStore.set(username);
+                        goto('/polls');
+                    } else {
+                        const responseData = await response.json();
+                        error = responseData.message || "Error creating user";
+                    }
+                } catch (err) {
+                    error = "Server error";
+                }
+            } else{
+                error = "Password doesnt match";
             }
         }
     }
@@ -59,12 +75,12 @@
 
         <button on:click={createUser}>Create User</button>
 
-        <p>
-            <p>Already have an account?<p>
-            <a on:click={goToSignIn} style="cursor: pointer; color: blue; text-decoration: underline;">
-                Click here to sign in.
-            </a>
-        </p>
+        <p>Already have an account?<p>
+
+        <button on:click={goToSignIn} style="cursor: pointer; margin: -20px 0 0 -10px; color: blue; background: none; border: none; text-decoration: underline; text-align: left">
+            Click here to sign in.
+        </button>
+
     </div>
 </div>
 

@@ -49,9 +49,9 @@
 
         <button on:click={signIn}>Sign in</button>
         <p>Are you new?<p>
-        <a on:click={goToSignUp} style="cursor: pointer; color: blue; text-decoration: underline;">
+        <button on:click={goToSignUp} style="cursor: pointer; margin: -20px 0 0 -10px; color: blue; background: none; border: none; text-decoration: underline; text-align: left">
             Click here to create a user.
-        </a>
+        </button>
 
     </div>
 </div>
