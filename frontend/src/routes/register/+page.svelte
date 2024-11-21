@@ -30,7 +30,7 @@
         };
 
         try {
-            const response = await fetch(`${baseUrl}/api/v1/user/create_user`, {
+            const response = await fetch(`${baseUrl}/api/v1/users/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

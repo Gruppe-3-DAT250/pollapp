@@ -4,6 +4,7 @@ import gruppe3.pollapp.DomainManager;
 import gruppe3.pollapp.domain.Poll;
 import gruppe3.pollapp.domain.User;
 import gruppe3.pollapp.domain.VoteOption;
+import gruppe3.pollapp.domain.Vote;
 import gruppe3.pollapp.login.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class PollController {
         this.domainManager = domainManager;
     }
 
-    @GetMapping("/get_polls")
+    @GetMapping
     public ResponseEntity<Collection<Poll>> getPolls(@RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -39,7 +40,7 @@ public class PollController {
         return ResponseEntity.ok(pollsForFrontend);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{pollId}")
     public ResponseEntity<Poll> getPollById(@PathVariable Long id, @RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -53,7 +54,7 @@ public class PollController {
         }
     }
 
-    @PostMapping(value = "/create_poll", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Poll> createPoll(@RequestBody Poll poll, @RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -87,4 +88,63 @@ public class PollController {
         domainManager.deletePoll(pollId);
         return ResponseEntity.ok("Poll deleted");
     }
+
+    @PostMapping("/{pollId}/{optionId}")
+    public ResponseEntity<Vote> createVote(@PathVariable Long pollId, @PathVariable Long optionId,
+            @RequestHeader("Authorization") String authToken) throws Exception {
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = authenticationService.extractUsernameFromToken(authToken);
+        Vote vote = domainManager.makeVote(username, optionId);
+
+        return ResponseEntity.ok(vote);
+    }
+
+    @DeleteMapping("/{pollId}/votes/")
+    public ResponseEntity<String> deleteVote(@PathVariable Long pollId,
+            @RequestHeader("Authorization") String authToken) {
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = authenticationService.extractUsernameFromToken(authToken);
+        boolean isDeleted = domainManager.deleteVote(username, pollId);
+        if (isDeleted) {
+            return ResponseEntity.ok("Vote deleted successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vote not found");
+        }
+    }
+
+    @GetMapping("{pollId}/votes")
+    public ResponseEntity<Long> getVotes(@PathVariable Long pollId,
+            @RequestHeader("Authorization") String authToken) {
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("{pollId}/votes/self")
+    public ResponseEntity<Long> hasUserVoted(@PathVariable Long pollId,
+            @RequestHeader("Authorization") String authToken) {
+
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = authenticationService.extractUsernameFromToken(authToken);
+
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Long voteOptionId = domainManager.getUserVoteOptionId(username, pollId);
+        if (voteOptionId == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(voteOptionId);
+    }
+
 }

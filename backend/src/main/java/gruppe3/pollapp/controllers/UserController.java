@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     @Autowired
@@ -46,7 +46,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/getId")
+    @GetMapping("/self")
     public ResponseEntity<Long> getUserId(@RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -58,7 +58,7 @@ public class UserController {
         return ResponseEntity.ok(user_id);
     }
 
-    @PostMapping("/create_user")
+    @PostMapping("/register")
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
             User createdUser = domainManager.createUser(user.getUsername(), user.getEmail(), user.getPassword());
@@ -85,7 +85,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/signIn")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 
         User user = domainManager.getUser(loginRequest.getUsername());

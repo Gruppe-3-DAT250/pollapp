@@ -1,6 +1,5 @@
 package gruppe3.pollapp;
 
-
 import gruppe3.pollapp.domain.Poll;
 import gruppe3.pollapp.domain.User;
 import gruppe3.pollapp.domain.Vote;
@@ -37,7 +36,7 @@ public interface DomainManager {
 
     void deleteVoteOptions(Poll poll);
 
-    boolean deleteVote(String username, Long optionId);
+    boolean deleteVote(String username, Long pollId);
 
     Long getUserVoteOptionId(String username, Long pollId);
 

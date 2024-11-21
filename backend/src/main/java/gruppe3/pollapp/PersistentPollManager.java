@@ -182,28 +182,27 @@ public class PersistentPollManager implements DomainManager {
 
     @Override
     @Transactional
-    public void deleteVoteOptions(Poll poll){
+    public void deleteVoteOptions(Poll poll) {
         voteOptionRepository.deleteByPoll(poll);
     }
 
     @Override
-    public boolean deleteVote(String username, Long optionId) {
+    public boolean deleteVote(String username, Long pollId) {
         User user = getUser(username);
-        Optional<VoteOption> maybeOption = voteOptionRepository.findById(optionId);
+        Poll poll = getPoll(pollId);
+        List<VoteOption> options = voteOptionRepository.findByPoll(poll);
 
-        VoteOption option;
-
-        if (maybeOption.isPresent()) {
-            option = maybeOption.get();
-        } else {
-            throw new EntityNotFoundException("Poll with id " + optionId + " does not exist.");
+        // Look through all voteOptions for this poll.
+        // If the user has voted for any of them, delete the vote and return.
+        // Else, do nothing and return false.
+        for (VoteOption option : options) {
+            if (voteRepository.existsByVoteOptionAndUser(option, user)) {
+                voteRepository.deleteByVoteOptionAndUser(option, user);
+                return true;
+            }
         }
 
-        List<Vote> votes = voteRepository.findByVoteOptionAndUser(option, user);
-
-        voteRepository.deleteAllInBatch(votes);
-
-        return true;
+        return false;
     }
 
     @Override

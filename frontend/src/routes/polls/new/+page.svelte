@@ -49,7 +49,7 @@
             }, {}),
         };
 
-        const response = await fetch(`${baseUrl}/api/v1/polls/create_poll`, {
+        const response = await fetch(`${baseUrl}/api/v1/polls`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -70,7 +70,7 @@
 
 <div class="nav-bar">
     <a href="/polls" class="nav-item">Polls</a>
-    <a href="/polls/create_poll" class="nav-item active">Create Poll</a>
+    <a href="/polls/new" class="nav-item active">Create Poll</a>
 </div>
 
 <div class="container">

@@ -63,7 +63,7 @@
 
                 if (!isExpired) {
                     const voteResponse = await fetch(
-                        `${baseUrl}/api/v1/vote/hasVoted?pollId=${pollId}`,
+                        `${baseUrl}/api/v1/polls/${pollId}/votes/self`,
                         {
                             method: "GET",
                             headers: {
@@ -98,7 +98,7 @@
     async function makeVote(optionId) {
         try {
             const response = await fetch(
-                `${baseUrl}/api/v1/vote/${optionId}?pollId=${pollId}`,
+                `${baseUrl}/api/v1/polls/${pollId}/${optionId}`,
                 {
                     method: "POST",
                     headers: {
@@ -122,15 +122,12 @@
 
     async function removeVote(optionId) {
         try {
-            const response = await fetch(
-                `${baseUrl}/api/v1/vote/${optionId}?pollId=${pollId}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${authToken}`,
-                    },
+            const response = await fetch(`${baseUrl}/api/v1/polls/${pollId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
                 },
-            );
+            });
 
             if (response.ok) {
                 userVote = null;
@@ -176,7 +173,7 @@
 
     async function fetchUserId() {
         const baseUrl = "http://localhost:8080";
-        const url = `${baseUrl}/api/v1/user/getId`;
+        const url = `${baseUrl}/api/v1/users/self`;
         const response = await fetch(url, {
             method: "GET",
             headers: {

@@ -12,7 +12,7 @@
 
     async function fetchPolls() {
         const baseUrl = "http://localhost:8080";
-        const url = `${baseUrl}/api/v1/polls/get_polls`;
+        const url = `${baseUrl}/api/v1/polls`;
 
         const response = await fetch(url, {
             method: "GET",
@@ -62,7 +62,7 @@
 
 <div class="nav-bar">
     <a href="/polls" class="nav-item active">Polls</a>
-    <a href="/polls/create_poll" style="cursor: pointer;" class="nav-item"
+    <a href="/polls/new" style="cursor: pointer;" class="nav-item"
         >Create Poll</a
     >
 </div>
