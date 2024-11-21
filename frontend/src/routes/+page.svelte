@@ -11,7 +11,7 @@
 
     async function signIn() {
         try {
-            const response = await fetch(`${baseUrl}/v1/api/user/signIn`, {
+            const response = await fetch(`${baseUrl}/api/v1/user/signIn`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

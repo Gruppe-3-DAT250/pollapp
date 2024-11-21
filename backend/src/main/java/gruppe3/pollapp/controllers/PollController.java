@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/v1/api/polls")
+@RequestMapping("/api/v1/polls")
 @CrossOrigin
 public class PollController {
 
@@ -77,9 +77,9 @@ public class PollController {
         return ResponseEntity.ok(options);
     }
 
-
     @DeleteMapping("/{pollId}")
-    public ResponseEntity<String> deletePoll(@PathVariable Long pollId, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<String> deletePoll(@PathVariable Long pollId,
+            @RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

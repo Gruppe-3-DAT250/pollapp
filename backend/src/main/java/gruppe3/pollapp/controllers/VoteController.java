@@ -13,7 +13,7 @@ import java.security.Principal;
 import java.util.Base64;
 
 @RestController
-@RequestMapping("/v1/api/vote")
+@RequestMapping("/api/v1/vote")
 @CrossOrigin
 public class VoteController {
 

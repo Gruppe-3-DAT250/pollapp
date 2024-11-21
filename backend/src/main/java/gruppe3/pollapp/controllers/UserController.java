@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/v1/api/user")
+@RequestMapping("/api/v1/user")
 public class UserController {
 
     @Autowired
@@ -41,8 +41,7 @@ public class UserController {
     public ResponseEntity<User> getUser(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(domainManager.getUser(id));
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).build();
         }
     }
