@@ -48,7 +48,7 @@
     async function fetchVoteOptionCount() {
         try {
             const response = await fetch(
-                `${baseUrl}/v1/api/polls/${pollId}/vote-counts`,
+                `${baseUrl}/api/v1/polls/${pollId}/vote-counts`,
                 {
                     method: "GET",
                     headers: {
@@ -129,7 +129,7 @@
     async function makeVote(optionId) {
         try {
             const response = await fetch(
-                `${baseUrl}/api/v1/polls/${pollId}/${optionId}`,
+                `${baseUrl}/api/v1/polls/${pollId}/options/${optionId}`,
                 {
                     method: "POST",
                     headers: {
@@ -154,7 +154,7 @@
 
     async function removeVote(optionId) {
         try {
-            const response = await fetch(`${baseUrl}/api/v1/polls/${pollId}`, {
+            const response = await fetch(`${baseUrl}/api/v1/polls/${pollId}/votes/`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${authToken}`,

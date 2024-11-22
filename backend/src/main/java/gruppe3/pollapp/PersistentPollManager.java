@@ -198,6 +198,7 @@ public class PersistentPollManager implements DomainManager {
     }
 
     @Override
+    @Transactional
     public boolean deleteVote(String username, Long pollId) {
         User user = getUser(username);
         Poll poll = getPoll(pollId);
@@ -206,8 +207,11 @@ public class PersistentPollManager implements DomainManager {
         // Look through all voteOptions for this poll.
         // If the user has voted for any of them, delete the vote and return.
         // Else, do nothing and return false.
+        System.out.println("here!");
         for (VoteOption option : options) {
+            System.out.println("here 2!");
             if (voteRepository.existsByVoteOptionAndUser(option, user)) {
+                System.out.println("here 3!");
                 voteRepository.deleteByVoteOptionAndUser(option, user);
                 return true;
             }
