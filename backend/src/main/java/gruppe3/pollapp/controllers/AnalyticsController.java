@@ -10,6 +10,7 @@ import gruppe3.pollapp.domain.Analytics;
 import gruppe3.pollapp.domain.EventCount;
 import gruppe3.pollapp.repositories.AnalyticsRepository;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -54,7 +55,7 @@ public class AnalyticsController {
         return ResponseEntity.ok(analyticsRepository.getEventCountsByDay(start, end));
     }
 
-    public static class Event {
+    public static class Event implements Serializable {
         private String eventType;
         private Object details;
         private LocalDateTime time;
