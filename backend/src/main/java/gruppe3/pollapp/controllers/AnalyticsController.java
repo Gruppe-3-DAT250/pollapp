@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/api/analytics")
+@RequestMapping("/api/v1/analytics")
 @CrossOrigin
 public class AnalyticsController {
 
