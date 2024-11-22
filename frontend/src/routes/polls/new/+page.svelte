@@ -39,14 +39,10 @@
             question: question,
             publishedAt: new Date().toISOString(),
             validUntil: new Date(validUntil).toISOString(),
-            options: options.reduce((acc, option, index) => {
-                acc[index.toString()] = {
-                    caption: option,
-                    presentationOrder: (index + 1).toString(),
-                    id: index.toString(),
-                };
-                return acc;
-            }, {}),
+            options: options.map((option, index) => ({
+                caption: option,
+                presentationOrder: index + 1, // Use the index + 1 for presentation order
+            })),
         };
 
         const response = await fetch(`${baseUrl}/api/v1/polls`, {

@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +43,13 @@ public class PollController {
     }
 
     @GetMapping("/{pollId}")
-    public ResponseEntity<Poll> getPollById(@PathVariable Long id, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<Poll> getPollById(@PathVariable Long pollId,
+            @RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Poll poll = domainManager.getPoll(id);
+        Poll poll = domainManager.getPoll(pollId);
         if (poll != null) {
             return ResponseEntity.ok(poll);
         } else {
@@ -54,16 +57,91 @@ public class PollController {
         }
     }
 
+    private static class CreatePollDTO {
+        private String question;
+        private Instant publishedAt;
+        private Instant validUntil;
+        private List<VoteOptionDTO> options;
+
+        public String getQuestion() {
+            return question;
+        }
+
+        public void setQuestion(String question) {
+            this.question = question;
+        }
+
+        public Instant getPublishedAt() {
+            return publishedAt;
+        }
+
+        public void setPublishedAt(Instant publishedAt) {
+            this.publishedAt = publishedAt;
+        }
+
+        public Instant getValidUntil() {
+            return validUntil;
+        }
+
+        public void setValidUntil(Instant validUntil) {
+            this.validUntil = validUntil;
+        }
+
+        public List<VoteOptionDTO> getOptions() {
+            return options;
+        }
+
+        public void setOptions(List<VoteOptionDTO> options) {
+            this.options = options;
+        }
+    }
+
+    private static class VoteOptionDTO {
+        private String caption;
+        private Integer presentationOrder;
+
+        public String getCaption() {
+            return caption;
+        }
+
+        public void setCaption(String caption) {
+            this.caption = caption;
+        }
+
+        public Integer getPresentationOrder() {
+            return presentationOrder;
+        }
+
+        public void setPresentationOrder(Integer presentationOrder) {
+            this.presentationOrder = presentationOrder;
+        }
+    }
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Poll> createPoll(@RequestBody Poll poll, @RequestHeader("Authorization") String authToken) {
+    public ResponseEntity<Poll> createPoll(@RequestBody CreatePollDTO request,
+            @RequestHeader("Authorization") String authToken) {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         String username = authenticationService.extractUsernameFromToken(authToken);
         User user = domainManager.getUser(username);
+
+        Poll poll = new Poll();
         poll.setOwner(user);
-        domainManager.addPoll(poll);
+        poll.setQuestion(request.getQuestion());
+        poll.setPublishedAt(request.getPublishedAt());
+        poll.setValidUntil(request.getValidUntil());
+
+        Collection<VoteOption> options = new ArrayList<>();
+        for (VoteOptionDTO optionDTO : request.getOptions()) {
+            VoteOption option = new VoteOption();
+            option.setPoll(poll);
+            option.setCaption(optionDTO.getCaption());
+            option.setPresentationOrder(optionDTO.getPresentationOrder());
+            options.add(option);
+        }
+
+        domainManager.addPoll(poll, options);
         return ResponseEntity.ok(poll);
     }
 
@@ -89,7 +167,7 @@ public class PollController {
         return ResponseEntity.ok("Poll deleted");
     }
 
-    @PostMapping("/{pollId}/{optionId}")
+    @PostMapping("/{pollId}/options/{optionId}")
     public ResponseEntity<Vote> createVote(@PathVariable Long pollId, @PathVariable Long optionId,
             @RequestHeader("Authorization") String authToken) throws Exception {
         if (!authenticationService.validateToken(authToken)) {
@@ -119,9 +197,10 @@ public class PollController {
     }
 
     @GetMapping("{pollId}/votes")
-    public ResponseEntity<Long> getVotes(@PathVariable Long pollId,
+    public ResponseEntity<Collection<Vote>> getVotes(@PathVariable Long pollId,
             @RequestHeader("Authorization") String authToken) {
 
+        Collection<Vote> votes = domainManager.getVotes(pollId);
         return ResponseEntity.noContent().build();
     }
 

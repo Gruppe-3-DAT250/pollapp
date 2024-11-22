@@ -49,8 +49,6 @@ public class PersistentPollManager implements DomainManager {
         poll1.setValidUntil(Instant.now().plusSeconds(86400));
         poll1.setOwner(user);
 
-        addPoll(poll1);
-
         VoteOption option1 = new VoteOption();
         option1.setCaption("Java");
         option1.setPresentationOrder(1);
@@ -65,13 +63,12 @@ public class PersistentPollManager implements DomainManager {
         options.add(option1);
         options.add(option2);
 
-        addVoteOptions(options);
+        addPoll(poll1, options);
 
         Poll poll2 = new Poll();
         poll2.setQuestion("What's your favourite food?");
         poll2.setPublishedAt(Instant.now());
         poll2.setValidUntil(Instant.now().minusSeconds(5));
-        addPoll(poll2);
 
         VoteOption option1_poll2 = new VoteOption();
         option1_poll2.setCaption("Pizza");
@@ -87,8 +84,7 @@ public class PersistentPollManager implements DomainManager {
         options_poll2.add(option1_poll2);
         options_poll2.add(option2_poll2);
 
-        addVoteOptions(options_poll2);
-
+        addPoll(poll2, options_poll2);
     }
 
     @Override
@@ -142,8 +138,9 @@ public class PersistentPollManager implements DomainManager {
     }
 
     @Override
-    public void addPoll(Poll poll) {
+    public void addPoll(Poll poll, Collection<VoteOption> options) {
         pollRepository.save(poll);
+        voteOptionRepository.saveAll(options);
     }
 
     @Override
@@ -184,6 +181,20 @@ public class PersistentPollManager implements DomainManager {
     @Transactional
     public void deleteVoteOptions(Poll poll) {
         voteOptionRepository.deleteByPoll(poll);
+    }
+
+    @Override
+    public Collection<Vote> getVotes(Long pollId) {
+        Poll poll = getPoll(pollId);
+        Collection<Vote> votes = new ArrayList<>();
+        Collection<VoteOption> options = voteOptionRepository.findByPoll(poll);
+        for (VoteOption option : options) {
+            Collection<Vote> votesForOption = voteRepository.findByVoteOption(option);
+            if (!votesForOption.isEmpty()) {
+                votes.addAll(votesForOption);
+            }
+        }
+        return votes;
     }
 
     @Override

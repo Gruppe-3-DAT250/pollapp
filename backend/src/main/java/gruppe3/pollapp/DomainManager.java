@@ -26,11 +26,13 @@ public interface DomainManager {
 
     Poll getPoll(Long id);
 
-    void addPoll(Poll poll);
+    void addPoll(Poll poll, Collection<VoteOption> options);
 
     void addVoteOptions(Collection<VoteOption> options);
 
     Vote makeVote(String username, Long optionId) throws Exception;
+
+    Collection<Vote> getVotes(Long pollId);
 
     void deletePoll(Long id);
 

@@ -55,7 +55,7 @@ dependencies {
 apply(plugin = "docker-compose")
 
 dockerCompose {
-    useComposeFiles = listOf("docker-compose.dev.yml")
+    useComposeFiles = listOf("docker-compose.yml")
     startedServices = listOf("postgres")
 
     stopContainers = true
@@ -64,11 +64,6 @@ dockerCompose {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-tasks.named("bootRun") {
-    dependsOn("composeUp")
-    finalizedBy("composeDown")
 }
 
 tasks.test {
