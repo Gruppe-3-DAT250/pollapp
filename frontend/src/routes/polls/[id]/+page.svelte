@@ -46,6 +46,33 @@
         }
     }
 
+    async function fetchVoteOptionCount() {
+        try {
+            const response = await fetch(
+                `${baseUrl}/v1/api/polls/${pollId}/vote-counts`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                },
+            );
+            if (response.ok) {
+                const voteCounts = await response.json();
+                poll.options = poll.options.map(option => {
+                    const voteCount = voteCounts[option.caption] || 0;
+                    return { ...option, voteCount };
+                });
+
+                poll = { ...poll };
+            } else {
+                console.error("Failed to fetch vote counts:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error fetching vote counts:", error);
+        }
+    }
+
     onMount(async () => {
         unsubscribe = authStore.subscribe((value) => {
             authToken = value.authToken;
@@ -83,6 +110,7 @@
                 }
 
                 await fetchVoteOptions();
+                await fetchVoteOptionCount();
             } else {
                 console.error("Poll not found:", response.statusText);
                 poll = null;
@@ -114,6 +142,7 @@
 
             if (response.ok) {
                 await fetchVoteOptions();
+                await fetchVoteOptionCount();
                 userVote = optionId;
                 poll = { ...poll };
             } else {
@@ -139,6 +168,7 @@
             if (response.ok) {
                 userVote = null;
                 await fetchVoteOptions();
+                await fetchVoteOptionCount();
 
             } else {
                 console.error("Failed to remove vote:", response.statusText);
@@ -210,7 +240,7 @@
                         <span>{option.caption}</span>
                         <div class="vote-button-container">
                             <span class="vote-count"
-                                >{option.votes?.length || 0}</span
+                                >{option.voteCount || 0}</span
                             >
                             {#if userVote === option.id}
                                 <button
@@ -234,7 +264,7 @@
             </ul>
             <button on:click={goBack} class="back-button">Back to Polls</button>
 
-            {#if parseInt(poll.owner.id) === parseInt(userId)}
+            {#if poll.owner && parseInt(poll.owner.id) === parseInt(userId)}
                 <button on:click={deletePoll} class="delete-button" >Delete Poll</button>
             {/if}
         </div>

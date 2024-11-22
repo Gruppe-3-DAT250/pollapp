@@ -246,4 +246,18 @@ public class PersistentPollManager implements DomainManager {
         return voteOptionRepository.findByPoll(poll);
     }
 
+    @Override
+    public Map<VoteOption, Long> countVotesForVoteOptions(Long pollId) {
+        Poll poll = getPoll(pollId);
+        List<VoteOption> voteOptions = voteOptionRepository.findByPoll(poll);
+        Map<VoteOption, Long> voteCounts = new HashMap<>();
+
+        for (VoteOption voteOption : voteOptions) {
+            long count = voteRepository.countVotesByVoteOptionId(voteOption.getId());
+            voteCounts.put(voteOption, count);
+        }
+
+        return voteCounts;
+    }
+
 }

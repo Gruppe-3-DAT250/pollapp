@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public interface DomainManager {
@@ -44,5 +45,7 @@ public interface DomainManager {
     VoteOption getUserVoteOption(String username, Long pollId);
 
     Collection<VoteOption> getVoteOptionsByPollId(Long pollId);
+
+    Map<VoteOption, Long> countVotesForVoteOptions(Long pollId);
 
 }
