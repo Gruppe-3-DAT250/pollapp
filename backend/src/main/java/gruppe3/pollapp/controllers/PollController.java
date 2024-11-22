@@ -6,6 +6,7 @@ import gruppe3.pollapp.domain.User;
 import gruppe3.pollapp.domain.VoteOption;
 import gruppe3.pollapp.domain.Vote;
 import gruppe3.pollapp.login.AuthenticationService;
+import gruppe3.pollapp.repositories.PollRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/polls")
@@ -123,6 +125,7 @@ public class PollController {
         if (!authenticationService.validateToken(authToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
         String username = authenticationService.extractUsernameFromToken(authToken);
         User user = domainManager.getUser(username);
 
@@ -155,6 +158,20 @@ public class PollController {
         Collection<VoteOption> options = domainManager.getVoteOptionsByPollId(pollId);
         return ResponseEntity.ok(options);
     }
+
+    @GetMapping("/{pollId}/vote-counts")
+    public ResponseEntity<Map<String, Long>> getVoteCountsForPoll(@PathVariable Long pollId) {
+        Map<VoteOption, Long> voteCounts = domainManager.countVotesForVoteOptions(pollId);
+
+        Map<String, Long> result = voteCounts.entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> entry.getKey().getCaption(),
+                        Map.Entry::getValue
+                ));
+
+        return ResponseEntity.ok(result);
+    }
+
 
     @DeleteMapping("/{pollId}")
     public ResponseEntity<String> deletePoll(@PathVariable Long pollId,
@@ -225,5 +242,10 @@ public class PollController {
 
         return ResponseEntity.ok(voteOptionId);
     }
+
+}
+
+
+
 
 }
