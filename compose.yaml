@@ -6,7 +6,8 @@ services:
       - 'MONGO_INITDB_ROOT_PASSWORD=TopSecret'
       - 'MONGO_INITDB_ROOT_USERNAME=root'
     ports:
-      - '27018:27017'  
+      - '27018:27017'
+    container_name: mongodb-analytics
     volumes:
       - mongodb_analytics_data:/data/db 
 
