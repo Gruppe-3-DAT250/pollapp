@@ -70,7 +70,6 @@
         responseMessage = "Poll created!";
         // must be connected to api
         handleEvents('createPoll', {
-            username: $userStore.username,
             pollData: pollData
         });
     }
