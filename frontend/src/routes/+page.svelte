@@ -9,9 +9,9 @@
     let error = "";
     const baseUrl = "http://localhost:8080";
 
-    async function signIn() {
+    async function login() {
         try {
-            const response = await fetch(`${baseUrl}/v1/api/user/signIn`, {
+            const response = await fetch(`${baseUrl}/api/v1/users/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -36,7 +36,7 @@
     }
 
     function goToSignUp() {
-        goto("/create_user");
+        goto("/register");
     }
 </script>
 
@@ -61,7 +61,7 @@
             <p style="color: red;">{error}</p>
         {/if}
 
-        <button on:click={signIn}>Sign in</button>
+        <button on:click={login}>Sign in</button>
         <p>Are you new?</p>
         <p>
             <button

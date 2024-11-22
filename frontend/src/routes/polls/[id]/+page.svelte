@@ -1,10 +1,10 @@
 <!-- this is the page for showing individual polls. -->
 
-<script>
+<script lang="ts">
     import { onDestroy, onMount } from "svelte";
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
-    import { authStore } from "$lib/store.ts";
+    import { authStore } from "$lib/store";
 
     let poll = null;
     let pollId;
@@ -12,15 +12,16 @@
     let userVote = null;
     let unsubscribe;
     let isExpired;
+    let userId: number;
 
-    $: pollId = $page.params.id ? $page.params.id : null;
+    $: pollId = $page.params.id ? parseInt($page.params.id) : null;
 
     const baseUrl = "http://localhost:8080";
 
     async function fetchVoteOptions() {
         try {
             const response = await fetch(
-                `${baseUrl}/v1/api/voteOption/${pollId}/options`,
+                `${baseUrl}/api/v1/polls/${pollId}/options`,
                 {
                     method: "GET",
                     headers: {
@@ -47,7 +48,9 @@
         });
 
         try {
-            const response = await fetch(`${baseUrl}/v1/api/polls/${pollId}`, {
+            await fetchUserId();
+
+            const response = await fetch(`${baseUrl}/api/v1/polls/${pollId}`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -60,7 +63,7 @@
 
                 if (!isExpired) {
                     const voteResponse = await fetch(
-                        `${baseUrl}/v1/api/vote/hasVoted?pollId=${pollId}`,
+                        `${baseUrl}/api/v1/polls/${pollId}/votes/self`,
                         {
                             method: "GET",
                             headers: {
@@ -95,7 +98,7 @@
     async function makeVote(optionId) {
         try {
             const response = await fetch(
-                `${baseUrl}/v1/api/vote/${optionId}?pollId=${pollId}`,
+                `${baseUrl}/api/v1/polls/${pollId}/${optionId}`,
                 {
                     method: "POST",
                     headers: {
@@ -119,15 +122,12 @@
 
     async function removeVote(optionId) {
         try {
-            const response = await fetch(
-                `${baseUrl}/v1/api/vote/${optionId}?pollId=${pollId}`,
-                {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${authToken}`,
-                    },
+            const response = await fetch(`${baseUrl}/api/v1/polls/${pollId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
                 },
-            );
+            });
 
             if (response.ok) {
                 userVote = null;
@@ -137,6 +137,57 @@
             }
         } catch (error) {
             console.error("Error removing vote:", error);
+        }
+    }
+
+    async function deletePoll() {
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this poll?",
+        );
+        if (confirmDelete) {
+            try {
+                const response = await fetch(
+                    `${baseUrl}/api/v1/polls/${pollId}`,
+                    {
+                        method: "DELETE",
+                        headers: {
+                            Authorization: `Bearer ${authToken}`,
+                        },
+                    },
+                );
+
+                if (response.ok) {
+                    console.log("Poll deleted successfully.");
+                    goto("/polls");
+                } else {
+                    console.error(
+                        "Failed to delete poll:",
+                        response.statusText,
+                    );
+                }
+            } catch (error) {
+                console.error("Error deleting poll:", error);
+            }
+        }
+    }
+
+    async function fetchUserId() {
+        const baseUrl = "http://localhost:8080";
+        const url = `${baseUrl}/api/v1/users/self`;
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${authToken}`,
+            },
+        });
+
+        if (response.ok) {
+            userId = await response.json();
+        } else {
+            const error = await response.json();
+            console.error("Error fetching user ID:", error.message);
+            throw new Error(error.message);
         }
     }
 
@@ -153,7 +204,7 @@
             {/if}
             <h2>{poll.question}</h2>
             <ul class="options-list">
-                {#each Object.values(poll.options) as option (option.id)}
+                {#each poll.options as option (option.id)}
                     <li class="option-box">
                         <span>{option.caption}</span>
                         <div class="vote-button-container">
@@ -181,6 +232,12 @@
                 {/each}
             </ul>
             <button on:click={goBack} class="back-button">Back to Polls</button>
+
+            {#if parseInt(poll.owner.id) === parseInt(userId)}
+                <button on:click={deletePoll} class="delete-button"
+                    >Delete Poll</button
+                >
+            {/if}
         </div>
     {:else}
         <p>Poll not found.</p>
@@ -249,6 +306,7 @@
         display: inline;
     }
 
+    .delete-button,
     .back-button,
     .vote-button,
     .remove-vote-button {
@@ -261,6 +319,11 @@
         width: 100%;
         cursor: pointer;
         font-size: 1.2rem;
+    }
+
+    .delete-button {
+        background-color: #ff0000;
+        width: auto;
     }
 
     .back-button:hover,

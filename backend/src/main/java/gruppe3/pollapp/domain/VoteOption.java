@@ -5,18 +5,27 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class VoteOption {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String caption;
     private long presentationOrder;
-    private Integer id;
 
-    @JsonManagedReference
-    private List<Vote> votes;
-
+    @ManyToOne
+    private Poll poll;
 
     public VoteOption() {
-        this.votes = new ArrayList<>();
     }
 
     public String getCaption() {
@@ -35,29 +44,28 @@ public class VoteOption {
         this.presentationOrder = presentationOrder;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public List<Vote> getVotes() {
-        return votes;
+    public Poll getPoll() {
+        return poll;
     }
 
-    public void setVotes(List<Vote> votes) {
-        this.votes = votes;
+    public void setPoll(Poll poll) {
+        this.poll = poll;
     }
 
-    public void addVote(Vote vote) {
-        votes.add(vote);
-    }
-
-    public void removeVote(Vote vote){
-        votes.remove(vote);
-    }
-
+    // public void addVote(Vote vote) {
+    // votes.add(vote);
+    // }
+    //
+    // public void removeVote(Vote vote) {
+    // votes.remove(vote);
+    // }
 
 }

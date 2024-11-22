@@ -5,13 +5,17 @@ import gruppe3.pollapp.domain.User;
 import gruppe3.pollapp.domain.Vote;
 import gruppe3.pollapp.domain.VoteOption;
 import gruppe3.pollapp.repositories.UserRepository;
+import gruppe3.pollapp.repositories.VoteOptionRepository;
+import gruppe3.pollapp.repositories.VoteRepository;
 import gruppe3.pollapp.repositories.PollRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
@@ -26,37 +30,40 @@ public class PersistentPollManager implements DomainManager {
     @Autowired
     private PollRepository pollRepository;
 
+    @Autowired
+    private VoteOptionRepository voteOptionRepository;
+
+    @Autowired
+    private VoteRepository voteRepository;
+
     public PersistentPollManager() {
     }
 
     @PostConstruct
     private void initializeMockData() {
-        createUser("user1", "password", "user@example.com");
+        User user = createUser("user1", "password", "user@example.com");
 
         Poll poll1 = new Poll();
         poll1.setQuestion("What's your favorite programming language?");
         poll1.setPublishedAt(Instant.now());
         poll1.setValidUntil(Instant.now().plusSeconds(86400));
+        poll1.setOwner(user);
 
         VoteOption option1 = new VoteOption();
-        option1.setId(0);
         option1.setCaption("Java");
         option1.setPresentationOrder(1);
-        option1.setVotes(new ArrayList<>());
+        option1.setPoll(poll1);
 
         VoteOption option2 = new VoteOption();
-        option2.setId(1);
         option2.setCaption("Python");
         option2.setPresentationOrder(2);
-        option2.setVotes(new ArrayList<>());
+        option2.setPoll(poll1);
 
-        Map<Integer, VoteOption> options = new HashMap<>();
-        options.put(0, option1);
-        options.put(1, option2);
+        ArrayList<VoteOption> options = new ArrayList<>();
+        options.add(option1);
+        options.add(option2);
 
-        poll1.setOptions(options);
-
-        addPoll(poll1);
+        addPoll(poll1, options);
 
         Poll poll2 = new Poll();
         poll2.setQuestion("What's your favourite food?");
@@ -64,29 +71,20 @@ public class PersistentPollManager implements DomainManager {
         poll2.setValidUntil(Instant.now().minusSeconds(5));
 
         VoteOption option1_poll2 = new VoteOption();
-        option1_poll2.setId(0);
         option1_poll2.setCaption("Pizza");
         option1_poll2.setPresentationOrder(1);
-        option1_poll2.setVotes(new ArrayList<>());
+        option1_poll2.setPoll(poll2);
 
         VoteOption option2_poll2 = new VoteOption();
-        option2_poll2.setId(1);
         option2_poll2.setCaption("Salmon with ketchup and bearnaise sauce");
         option2_poll2.setPresentationOrder(2);
+        option2_poll2.setPoll(poll2);
 
-        List<Vote> votesToAdd = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
-            votesToAdd.add(new Vote());
-        }
-        option2_poll2.setVotes(votesToAdd);
+        ArrayList<VoteOption> options_poll2 = new ArrayList<>();
+        options_poll2.add(option1_poll2);
+        options_poll2.add(option2_poll2);
 
-        Map<Integer, VoteOption> options_poll2 = new HashMap<>();
-        options_poll2.put(0, option1_poll2);
-        options_poll2.put(1, option2_poll2);
-
-        poll2.setOptions(options_poll2);
-
-        addPoll(poll2);
+        addPoll(poll2, options_poll2);
     }
 
     @Override
@@ -130,7 +128,7 @@ public class PersistentPollManager implements DomainManager {
     }
 
     @Override
-    public Poll getPoll(String id) {
+    public Poll getPoll(Long id) {
         Optional<Poll> poll = pollRepository.findById(id);
         if (poll.isPresent()) {
             return poll.get();
@@ -140,66 +138,112 @@ public class PersistentPollManager implements DomainManager {
     }
 
     @Override
-    public void addPoll(Poll poll) {
+    public void addPoll(Poll poll, Collection<VoteOption> options) {
         pollRepository.save(poll);
+        voteOptionRepository.saveAll(options);
     }
 
     @Override
-    public Vote makeVote(String username, String pollId, Integer optionId) {
-        User user = getUser(username);
-        Poll poll = getPoll(pollId);
-        if (user == null || poll == null) {
-            return null;
-        }
+    public void addVoteOptions(Collection<VoteOption> options) {
+        voteOptionRepository.saveAll(options);
+    }
 
-        VoteOption option = poll.getOptions().get(optionId);
-        if (option == null) {
-            return null;
+    @Override
+    @Transactional
+    public Vote makeVote(String username, Long optionId) {
+        User user = getUser(username);
+        Optional<VoteOption> maybeOption = voteOptionRepository.findById(optionId);
+
+        VoteOption option;
+
+        if (maybeOption.isPresent()) {
+            option = maybeOption.get();
+        } else {
+            throw new EntityNotFoundException("Poll with id " + optionId + " does not exist.");
         }
 
         Vote vote = new Vote();
-        vote.setVoteOption(option);
         vote.setUser(user);
-        option.addVote(vote);
+        vote.setVoteOption(option);
+
+        voteRepository.save(vote);
+
         return vote;
     }
 
     @Override
-    public boolean deleteVote(String username, String pollId, Integer optionId) {
-        User user = getUser(username);
-        Poll poll = getPoll(pollId);
-        if (user == null || poll == null) {
-            return false;
-        }
-
-        VoteOption option = poll.getOptions().get(optionId);
-        if (option == null) {
-            return false;
-        }
-
-        Vote userVote = option.getVotes().stream()
-                .filter(vote -> vote.getUser().getUsername().equals(username))
-                .findFirst()
-                .orElse(null);
-
-        if (userVote == null) {
-            return false;
-        }
-
-        option.removeVote(userVote);
-
-        return true;
+    @Transactional
+    public void deletePoll(Long id) {
+        pollRepository.deleteById(id);
     }
 
     @Override
-    public Integer getUserVoteOption(String username, String pollId) {
+    @Transactional
+    public void deleteVoteOptions(Poll poll) {
+        voteOptionRepository.deleteByPoll(poll);
+    }
+
+    @Override
+    public Collection<Vote> getVotes(Long pollId) {
+        Poll poll = getPoll(pollId);
+        Collection<Vote> votes = new ArrayList<>();
+        Collection<VoteOption> options = voteOptionRepository.findByPoll(poll);
+        for (VoteOption option : options) {
+            Collection<Vote> votesForOption = voteRepository.findByVoteOption(option);
+            if (!votesForOption.isEmpty()) {
+                votes.addAll(votesForOption);
+            }
+        }
+        return votes;
+    }
+
+    @Override
+    public boolean deleteVote(String username, Long pollId) {
+        User user = getUser(username);
+        Poll poll = getPoll(pollId);
+        List<VoteOption> options = voteOptionRepository.findByPoll(poll);
+
+        // Look through all voteOptions for this poll.
+        // If the user has voted for any of them, delete the vote and return.
+        // Else, do nothing and return false.
+        for (VoteOption option : options) {
+            if (voteRepository.existsByVoteOptionAndUser(option, user)) {
+                voteRepository.deleteByVoteOptionAndUser(option, user);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public Long getUserVoteOptionId(String username, Long pollId) {
+        VoteOption option = getUserVoteOption(username, pollId);
+
+        if (option == null) {
+            return null;
+        }
+
+        return option.getId();
+    }
+
+    @Override
+    public VoteOption getUserVoteOption(String username, Long pollId) {
+        User user = getUser(username);
         Poll poll = getPoll(pollId);
 
-        for (VoteOption option : poll.getOptions().values()) {
-            for (Vote vote : option.getVotes()) {
-                if (vote.getUser().getUsername().equals(username)) {
-                    return vote.getVoteOption().getId();
-                }
+        List<VoteOption> options = voteOptionRepository.findByPoll(poll);
+
+        if (options == null) {
+            return null;
+        }
+
+        for (VoteOption option : options) {
+            if (option == null) {
+                return null;
+            }
+            if (voteRepository.existsByVoteOptionAndUser(option, user)) {
+                return option;
             }
         }
 
@@ -207,9 +251,9 @@ public class PersistentPollManager implements DomainManager {
     }
 
     @Override
-    public Collection<VoteOption> getVoteOptionsByPollId(String pollId) {
+    public Collection<VoteOption> getVoteOptionsByPollId(Long pollId) {
         Poll poll = getPoll(pollId);
-        return poll.getOptions().values();
+        return voteOptionRepository.findByPoll(poll);
     }
 
 }

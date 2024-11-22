@@ -15,22 +15,5 @@ services:
     networks:
       - pollapp
 
-  # TODO: MONGO CONFIG IS PLACEHOLDER
-  # https://hub.docker.com/_/mongo
-  mongo:
-    image: mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: verysecret
-      MONGO_INITDB_DATABASE: pollapp
-    ports:
-      - "27017:27017"
-    container_name: pollapp-mongo
-    volumes:
-      # TODO: Implement this script. It exists with some instructions
-      - ./database/mongo/init-mongo.sh:/init-mongo.sh
-    networks:
-      - pollapp
-
 networks:
   pollapp:

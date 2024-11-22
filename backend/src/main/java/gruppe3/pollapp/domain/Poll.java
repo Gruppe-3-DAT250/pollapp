@@ -1,29 +1,36 @@
 package gruppe3.pollapp.domain;
 
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.annotation.Id;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Document
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class Poll {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String question;
     private Instant publishedAt;
     private Instant validUntil;
 
-    private Long creator_id;
-    private Map<Integer, VoteOption> options;
+    @ManyToOne
+    private User owner;
 
-    public Poll(){
+    public Poll() {
 
     }
+
     public String getQuestion() {
         return question;
     }
@@ -48,34 +55,19 @@ public class Poll {
         this.validUntil = validUntil;
     }
 
-    public Map<Integer, VoteOption> getOptions() {
-        return options;
-    }
-
-    public void setOptions(Map<Integer, VoteOption> options) {
-        this.options = options;
-    }
-
-    public void setOptionsList(List<VoteOption> optionsList) {
-        this.options = new HashMap<>();
-        for (VoteOption option : optionsList) {
-            this.options.put(option.getId(), option);
-        }
-    }
-
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getCreator_id() {
-        return creator_id;
+    public User getOwner() {
+        return owner;
     }
 
-    public void setCreator_id(Long creator_id) {
-        this.creator_id = creator_id;
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 }

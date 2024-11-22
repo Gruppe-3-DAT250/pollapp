@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/v1/api/user")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     @Autowired
@@ -41,13 +41,24 @@ public class UserController {
     public ResponseEntity<User> getUser(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(domainManager.getUser(id));
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).build();
         }
     }
 
-    @PostMapping("/create_user")
+    @GetMapping("/self")
+    public ResponseEntity<Long> getUserId(@RequestHeader("Authorization") String authToken) {
+        if (!authenticationService.validateToken(authToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String username = authenticationService.extractUsernameFromToken(authToken);
+        User user = domainManager.getUser(username);
+        Long user_id = user.getId();
+
+        return ResponseEntity.ok(user_id);
+    }
+
+    @PostMapping("/register")
     public ResponseEntity<?> createUser(@RequestBody User user) {
         try {
             User createdUser = domainManager.createUser(user.getUsername(), user.getEmail(), user.getPassword());
@@ -74,13 +85,12 @@ public class UserController {
         }
     }
 
-    @PostMapping("/signIn")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
 
         User user = domainManager.getUser(loginRequest.getUsername());
         if (user != null && user.getPassword().equals(loginRequest.getPassword())) {
             String token = authenticationService.generateToken(user);
-            System.out.println(token);
             return ResponseEntity.ok(new LoginResponse(token));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user");
