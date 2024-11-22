@@ -2,14 +2,32 @@
 
 
 <script>
-    import { userStore } from '$lib/store.js';
-    import pollsData from '../../../data/fake_polls.json';
+    import { authStore } from '$lib/store.ts';
     import { goto } from '$app/navigation';
+    import {onDestroy, onMount} from "svelte";
+
   import { handleEvents } from '$lib/handleEvents';
 
     let question = '';
+    let validUntil = '';
     let options = [''];
     let responseMessage = '';
+    let authToken;
+    let unsubscribe;
+
+    const baseUrl = "http://localhost:8080";
+
+    onMount(async () => {
+        unsubscribe = authStore.subscribe(value => {
+            authToken = value.authToken;
+        });
+    });
+
+    onDestroy(() => {
+        if (unsubscribe) {
+            unsubscribe();
+        }
+    });
 
     function addOption() {
         options = [...options, ''];
@@ -19,17 +37,41 @@
         options[index] = value;
     }
 
-    function createPoll() {
-        const pollData = { // variables need to be changed
-            question,
+    async function createPoll() {
+
+        const pollData = {
+            question: question,
             publishedAt: new Date().toISOString(),
-            validUntil: new Date().toISOString(), // change to userinput?
-            creator: { username: $userStore.username },
-            options: options.map((option, index) => ({
-                caption: option,
-                presentationOrder: (index + 1).toString(),
-            })),
+            validUntil: new Date(validUntil).toISOString(),
+            options: options.reduce((acc, option, index) => {
+                acc[(index).toString()] = {
+                    caption: option,
+                    presentationOrder: (index + 1).toString(),
+                    id: (index).toString()
+                };
+                return acc;
+            }, {})
         };
+
+        const response = await fetch(`${baseUrl}/v1/api/polls/create_poll`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: JSON.stringify(pollData)
+        })
+
+        if (response.ok){
+            responseMessage = "Poll created!"
+            await goto('/polls');
+        }
+        else{
+            const data = await response.json();
+            console.log(data.message);
+        }
+
+
 
         console.log("Poll created:", pollData);
         responseMessage = "Poll created!";
@@ -41,11 +83,12 @@
     }
 
 
+
 </script>
 
 <div class="nav-bar">
-    <span on:click={() => goto('/polls')} class="nav-item">Polls</span>
-    <span class="nav-item active">Create Poll</span>
+    <a href="/polls" class="nav-item">Polls</a>
+    <a href="/polls/create_poll" class="nav-item active">Create Poll</a>
 </div>
 
 <div class="container">
@@ -61,6 +104,8 @@
                     <input type="text" id={"option" + index} bind:value={options[index]} on:input={e => updateOption(index, e.target.value)} required />
                 {/each}
             </div>
+
+            <input type="date" bind:value={validUntil} placeholder="Valid Until" />
 
             <button type="button" class="add-option" on:click={addOption}>Add Another Option</button>
             <button type="submit" class="submit-button">Submit</button>
@@ -92,6 +137,7 @@
         margin: 0 25px;
         padding: 15px;
         cursor: pointer;
+        text-decoration: none;
     }
 
     .nav-item.active {

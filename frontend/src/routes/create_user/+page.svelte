@@ -1,62 +1,58 @@
+<!-- this is the page for creating a user -->
+
 <script>
-    import { goto } from '$app/navigation';
-    import { userStore } from '$lib/store.js';
-    import users from '../../data/fake_users.json';  // Assuming the json is in $lib directory
+    import { goto } from "$app/navigation";
+    import { authStore } from "$lib/store.ts";
 
-
-    let username = '';
-    let password = '';
-    let checkPassword = '';
-    let email = '';
-    let success = false;
-    let error = '';
+    let username = "";
+    let password = "";
+    let checkPassword = "";
+    let email = "";
+    let error = "";
 
     const baseUrl = "http://localhost:8080";
 
     async function createUser() {
-        const existingUser = users.find(user => user.username === username);
-        if (existingUser){
-            error = "Username taken. Log in or try again."
+        // add function to check if username is taken
+
+        if (password !== checkPassword) {
+            error = "Passwords do not match.";
+            return;
         }
-        else{
-            if (password === checkPassword) {
-                const newUser = {
-                    username: username,
-                    email: email,
-                    password: password,
-                    polls: [],
-                    votes: [],
-                    createdAt: new Date().toISOString(),
-                };
 
-                try {
-                    const response = await fetch(`${baseUrl}/v1/api/user/create_user`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(newUser)
-                    });
+        const newUser = {
+            username: username,
+            email: email,
+            password: password,
+            polls: [],
+            votes: [],
+            createdAt: new Date().toISOString(),
+        };
 
-                    if (response.ok) {
-                        success = true;
-                        userStore.set(username);
-                        goto('/polls');
-                    } else {
-                        const responseData = await response.json();
-                        error = responseData.message || "Error creating user";
-                    }
-                } catch (err) {
-                    error = "Server error";
-                }
-            } else{
-                error = "Password doesnt match";
+        try {
+            const response = await fetch(`${baseUrl}/v1/api/user/create_user`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newUser),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                authStore.setToken(data.token);
+                goto("/polls");
+            } else {
+                const responseData = await response.json();
+                error = responseData.message || "Error creating user";
             }
+        } catch (err) {
+            error = "Server error";
         }
     }
 
     function goToSignIn() {
-        goto('/');
+        goto("/");
     }
 </script>
 
@@ -64,9 +60,24 @@
     <div class="user">
         <h2>Create User</h2>
 
-        <input type="text" bind:value={username} placeholder="Username" required />
-        <input type="password" bind:value={password} placeholder="Password" required />
-        <input type="password" bind:value={checkPassword} placeholder="Retype password" required />
+        <input
+            type="text"
+            bind:value={username}
+            placeholder="Username"
+            required
+        />
+        <input
+            type="password"
+            bind:value={password}
+            placeholder="Password"
+            required
+        />
+        <input
+            type="password"
+            bind:value={checkPassword}
+            placeholder="Retype password"
+            required
+        />
         <input type="email" bind:value={email} placeholder="Email" required />
 
         {#if error}
@@ -75,12 +86,15 @@
 
         <button on:click={createUser}>Create User</button>
 
-        <p>Already have an account?<p>
-
-        <button on:click={goToSignIn} style="cursor: pointer; margin: -20px 0 0 -10px; color: blue; background: none; border: none; text-decoration: underline; text-align: left">
-            Click here to sign in.
-        </button>
-
+        <p>Already have an account?</p>
+        <p>
+            <button
+                on:click={goToSignIn}
+                style="cursor: pointer; margin: -20px 0 0 -10px; color: blue; background: none; border: none; text-decoration: underline; text-align: left"
+            >
+                Click here to sign in.
+            </button>
+        </p>
     </div>
 </div>
 

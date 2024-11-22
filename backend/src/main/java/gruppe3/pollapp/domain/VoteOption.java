@@ -1,8 +1,7 @@
 package gruppe3.pollapp.domain;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,13 +9,14 @@ public class VoteOption {
 
     private String caption;
     private long presentationOrder;
-    private String id;
+    private Integer id;
+
     @JsonManagedReference
     private List<Vote> votes;
 
 
     public VoteOption() {
-
+        this.votes = new ArrayList<>();
     }
 
     public String getCaption() {
@@ -35,11 +35,11 @@ public class VoteOption {
         this.presentationOrder = presentationOrder;
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -51,8 +51,13 @@ public class VoteOption {
         this.votes = votes;
     }
 
-    public Vote addVote(Vote vote) {
+    public void addVote(Vote vote) {
         votes.add(vote);
-        return vote;
     }
+
+    public void removeVote(Vote vote){
+        votes.remove(vote);
+    }
+
+
 }

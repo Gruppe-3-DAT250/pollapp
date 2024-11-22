@@ -7,6 +7,7 @@ public class Vote {
 
     private Instant publishedAt;
     private User user;
+
     @JsonBackReference
     private VoteOption voteOption;
 
