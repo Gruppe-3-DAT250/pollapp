@@ -18,7 +18,7 @@
 
     $: pollId = $page.params.id ? parseInt($page.params.id) : null;
 
-    const baseUrl = "http://localhost:8080";
+    const baseUrl = "http://localhost";
 
 
     async function fetchVoteOptions() {

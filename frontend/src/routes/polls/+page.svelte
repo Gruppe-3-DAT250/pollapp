@@ -1,3 +1,4 @@
+
 <!-- this is the page for showing all polls -->
 
 <script>
@@ -5,13 +6,14 @@
     import { goto } from "$app/navigation";
     import { authStore } from "$lib/store.ts";
 
+
     let activePolls = [];
     let expiredPolls = [];
     let unsubscribe;
     let authToken;
 
     async function fetchPolls() {
-        const baseUrl = "http://localhost:8080";
+        const baseUrl = "http://localhost";
         const url = `${baseUrl}/api/v1/polls`;
 
         const response = await fetch(url, {
@@ -58,7 +60,10 @@
     function selectPoll(id) {
         goto(`/polls/${id}`);
     }
+
+
 </script>
+
 
 <div class="nav-bar">
     <a href="/polls" class="nav-item active">Polls</a>
@@ -204,4 +209,5 @@
         background-color: #ffcccc;
         color: #ff0000;
     }
+
 </style>

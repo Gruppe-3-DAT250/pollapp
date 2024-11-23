@@ -4,10 +4,10 @@
     import { goto } from "$app/navigation";
     import { authStore } from "$lib/store.ts";
 
-    let username = "";
-    let password = "";
-    let error = "";
-    const baseUrl = "http://localhost:8080";
+    let username = '';
+    let password = '';
+    let error = '';
+    const baseUrl = "http://localhost";
 
     async function login() {
         try {
@@ -38,6 +38,8 @@
     function goToSignUp() {
         goto("/register");
     }
+
+
 </script>
 
 <div class="container">
@@ -107,4 +109,5 @@
         cursor: pointer;
         margin: 10px 0;
     }
+
 </style>
