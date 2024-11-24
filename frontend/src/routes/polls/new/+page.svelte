@@ -64,14 +64,21 @@
             console.log(data.message);
         }
 
-
-
         console.log("Poll created:", pollData);
         responseMessage = "Poll created!";
         // must be connected to api
         handleEvents('createPoll', {
             pollData: pollData
         });
+    }
+
+    async function fetchCsrfToken() {
+        const response = await fetch(`${baseUrl}/csrf`, {
+            method: "GET",
+            credentials: "include"
+        });
+        const data = await response.json();
+        return data.csrfToken;
     }
 </script>
 
@@ -99,12 +106,8 @@
                     />
                 {/each}
             </div>
-
-            <input
-                type="date"
-                bind:value={validUntil}
-                placeholder="Valid Until"
-            />
+            <p>Valid until:</p>
+            <input type="date" bind:value={validUntil} placeholder="Valid Until" />
 
             <button type="button" class="add-option" on:click={addOption}
                 >Add Another Option</button
