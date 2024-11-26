@@ -31,6 +31,7 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/analytics/track").permitAll()
+                        .requestMatchers("/api/v1/analytics/daily-counts").permitAll()
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
                         .anyRequest().authenticated()
                 )
