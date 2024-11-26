@@ -13,16 +13,42 @@
     const baseUrl = "http://localhost";
 
     async function createUser() {
+
+        // Sanitize user inputs
+        function sanitize(value) {
+            return value.replace(/[&<>"'`=\/]/g, (character) => {
+                return `&#${character.charCodeAt(0)};`;
+            });
+        }
+
+        // Sanitize inputs before proceeding
+        const sanitizedUsername = sanitize(username);
+        const sanitizedEmail = sanitize(email);
+
         // add function to check if username is taken
+        if (!/^[a-zA-Z0-9_]+$/.test(sanitizedUsername)) {
+            error = "Username can only contain letters, numbers, and underscores.";
+            return;
+        }
+        if (!/^\S+@\S+\.\S+$/.test(sanitizedEmail)) {
+            error = "Please enter a valid email.";
+            return;
+        }
+        if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+            error = "Password must be at least 8 characters long and contain upper and lower case letters and numbers.";
+            return;
+        }
 
         if (password !== checkPassword) {
             error = "Passwords do not match.";
             return;
         }
 
+
+
         const newUser = {
-            username: username,
-            email: email,
+            username: sanitizedUsername,
+            email: sanitizedEmail,
             password: password,
             polls: [],
             votes: [],
