@@ -5,7 +5,7 @@ export const handleEvents = async (eventType, details) => {
         details,
         time : new Date().toISOString()
     }
-    const baseUrl = "http://localhost:8080"
+    const baseUrl = "http://localhost"
     try{
         const response =  await fetch(`${baseUrl}/api/v1/analytics/track`, {
             method: "POST",

@@ -206,7 +206,7 @@
     }
 
     async function fetchUserId() {
-        const baseUrl = "http://localhost:8080";
+        const baseUrl = "http://localhost";
         const url = `${baseUrl}/api/v1/users/self`;
         const response = await fetch(url, {
             method: "GET",

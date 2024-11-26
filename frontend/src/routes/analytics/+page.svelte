@@ -13,7 +13,7 @@
       const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
-      const baseUrl = "http://localhost:8080";
+      const baseUrl = "http://localhost";
 
       const response = await fetch(
               `${baseUrl}/api/v1/analytics/daily-counts?start=${startDate.toISOString()}&end=${endDate.toISOString()}`

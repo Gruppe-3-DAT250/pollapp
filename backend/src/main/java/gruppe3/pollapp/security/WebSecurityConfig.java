@@ -30,6 +30,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/analytics/track").permitAll()
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
                         .anyRequest().authenticated()
                 )
