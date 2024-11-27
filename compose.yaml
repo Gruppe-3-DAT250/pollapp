@@ -55,6 +55,10 @@ services:
       dockerfile: Dockerfile
       target: backend-build
     container_name: backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
+      SPRING_DATA_MONGODB_URI: mongodb://root:TopSecret@mongodb-analytics:27018/mongodb-analytics?authSource=admin
+
     ports:
       - "8080:8080"
     depends_on:
