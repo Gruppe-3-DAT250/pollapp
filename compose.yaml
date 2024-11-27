@@ -57,7 +57,13 @@ services:
     container_name: backend
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/postgres
-      SPRING_DATA_MONGODB_URI: mongodb://root:TopSecret@mongodb-analytics:27018/mongodb-analytics?authSource=admin
+      SPRING_APPLICATION_JSON: '{
+        "spring.data.mongodb.uri" : "mongodb://root:TopSecret@mongodb-analytics:27017/mongodb-analytics?authSource=admin",
+        "spring.rabbitmq.host": "rabbitmq",
+        "spring.rabbitmq.port": "5672",
+        "spring.rabbitmq.username": "myuser",
+        "spring.rabbitmq.password": "secret"
+      }'
 
     ports:
       - "8080:8080"
