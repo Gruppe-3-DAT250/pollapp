@@ -48,21 +48,11 @@ dependencies {
     testImplementation("org.springframework.amqp:spring-rabbit-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
     testImplementation("org.testcontainers:rabbitmq")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 }
 
-apply(plugin = "docker-compose")
-
-dockerCompose {
-    useComposeFiles = listOf("docker-compose.yml")
-    startedServices = listOf("postgres")
-
-    stopContainers = true
-    removeContainers = true
-}
 
 tasks.withType<Test> {
     useJUnitPlatform()
