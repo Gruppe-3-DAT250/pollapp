@@ -12,6 +12,7 @@ version = "0.0.1-SNAPSHOT"
 springBoot {
     mainClass.set("gruppe3.pollapp.PollappApplication")
 }
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -70,6 +71,10 @@ tasks.asciidoctor {
     dependsOn(tasks.test)
 }
 
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    archiveFileName.set("backend.jar")
+}
+
 allprojects {
     tasks.register<Copy>("copyWebApp") {
         from("frontend/build")
@@ -80,5 +85,6 @@ allprojects {
         }
     }
 }
+
 
 
