@@ -29,14 +29,14 @@ jobs:
           node-version: '22'
 
       - name: Build and Link frontend to backend
-        run: ./gradlew copyWebApp
+        run: gradle copyWebApp
 
       - name: Build Gradle Backend
-        run: ./gradlew build
+        run: gradle build
         working-directory: ./backend
 
       - name: Run Backend Tests
-        run: ./gradlew test
+        run: gradle test
         working-directory: ./backend
 
   docker-build:
