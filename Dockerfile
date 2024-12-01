@@ -29,8 +29,7 @@ COPY backend/ ./
 COPY --from=frontend-build /app/frontend/build/ backend/src/main/resources/static/
 
 
-RUN mv build/libs/backend-0.0.1-SNAPSHOT.jar app.jar
-
+RUN rm build/libs/*-plain.jar && mv build/libs/*.jar app.jar
 
 FROM eclipse-temurin:21-alpine
 

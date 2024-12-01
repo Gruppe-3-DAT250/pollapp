@@ -70,6 +70,8 @@ tasks.asciidoctor {
     dependsOn(tasks.test)
 }
 
+
+
 allprojects {
     tasks.register<Copy>("copyWebApp") {
         from("frontend/build")
@@ -80,5 +82,6 @@ allprojects {
         }
     }
 }
+
 
 
