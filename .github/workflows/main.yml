@@ -44,16 +44,14 @@ jobs:
     needs: build
 
     steps:
-      - name: Docker Setup Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Checkout the Code
+        uses: actions/checkout@v4
 
+      - name: Verify Files in Root
+        run: ls -al
 
-      - name: Verify Dockerfile location
-        run: ls -al /home/runner/work/pollapp/pollapp
-
-      - name: Build Docker image
+      - name: Build Docker Image
         run: |
-          cd /home/runner/work/pollapp/pollapp 
           docker build -f Dockerfile -t pollapp .
 
 
