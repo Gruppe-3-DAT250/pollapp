@@ -50,12 +50,12 @@ jobs:
       - name: List files in the root directory
         run: ls -al /home/runner/work/
 
-      - name: List files in the repository root
-        run: ls -al
-
+      - name: Verify pollapp directory exists
+        run: ls -al /home/runner/work/pollapp
 
       - name: Build Docker image
         run: |
+          cd /home/runner/work/pollapp  
           docker build -f Dockerfile -t pollapp .
 
 
