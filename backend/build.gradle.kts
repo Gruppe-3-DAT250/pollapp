@@ -69,3 +69,15 @@ tasks.asciidoctor {
     inputs.dir(project.extra["snippetsDir"]!!)
     dependsOn(tasks.test)
 }
+
+tasks.register<Copy>("copyFrontendToBackend") {
+    from("../frontend/build")
+    into("src/main/resources/static")
+
+    include("**/*.html")
+    doLast {
+        println("Files copied successfully to static folder.")
+    }
+}
+
+

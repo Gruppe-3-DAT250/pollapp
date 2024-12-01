@@ -15,8 +15,3 @@ tasks.register<NpmTask>("runBuild") {
     workingDir = file(".")
 }
 
-tasks.register<Copy>("copyWebApp") {
-    from("dist")
-    into("../backend/src/main/resources/static")
-    dependsOn("runBuild")
-}
