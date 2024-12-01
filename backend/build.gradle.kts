@@ -70,13 +70,14 @@ tasks.asciidoctor {
     dependsOn(tasks.test)
 }
 
-tasks.register<Copy>("copyFrontendToBackend") {
-    from("../frontend/build")
-    into("src/main/resources/static")
-
-    include("**/*.html")
-    doLast {
-        println("Files copied successfully to static folder.")
+allprojects {
+    tasks.register<Copy>("copyWebApp") {
+        from("frontend/build")
+        into("backend/src/main/resources/static")
+        include("*.html")
+        doLast {
+            println("Web app copied successfully.")
+        }
     }
 }
 
