@@ -47,11 +47,10 @@ jobs:
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Print Current Directory (Debugging)
-        run: pwd
-
-      - name: Build Docker Image
-        run: docker build -t pollapp.
+      - name: Build Docker image
+        run: |
+          cd pollapp  
+          docker build -t pollapp .
 
 
 
