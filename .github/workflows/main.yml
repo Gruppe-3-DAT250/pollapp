@@ -55,7 +55,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          cd /home/runner/work/pollapp  
+          cd /home/runner/work/pollapp/pollapp 
           docker build -f Dockerfile -t pollapp .
 
 
