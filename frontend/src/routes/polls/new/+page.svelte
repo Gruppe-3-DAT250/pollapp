@@ -1,63 +1,117 @@
 <!-- this is the page for creating polls -->
 
-
 <script>
-    import { userStore } from '$lib/store.js';
-    import pollsData from '../../../data/fake_polls.json';
-    import { goto } from '$app/navigation';
+    import { authStore } from "$lib/store.ts";
+    import { goto } from "$app/navigation";
+    import { onDestroy, onMount } from "svelte";
+
+  import { handleEvents } from '$lib/handleEvents';
 
     let question = '';
+    let validUntil = '';
     let options = [''];
     let responseMessage = '';
+    let authToken;
+    let unsubscribe;
+
+    const baseUrl = "http://localhost";
+
+    onMount(async () => {
+        unsubscribe = authStore.subscribe((value) => {
+            authToken = value.authToken;
+        });
+    });
+
+    onDestroy(() => {
+        if (unsubscribe) {
+            unsubscribe();
+        }
+    });
 
     function addOption() {
-        options = [...options, ''];
+        options = [...options, ""];
     }
 
     function updateOption(index, value) {
         options[index] = value;
     }
 
-    function createPoll() {
-        const pollData = { // variables need to be changed
-            question,
+    async function createPoll() {
+        const pollData = {
+            question: question,
             publishedAt: new Date().toISOString(),
-            validUntil: new Date().toISOString(), // change to userinput?
-            creator: { username: $userStore.username },
+            validUntil: new Date(validUntil).toISOString(),
             options: options.map((option, index) => ({
                 caption: option,
-                presentationOrder: (index + 1).toString(),
+                presentationOrder: index + 1, // Use the index + 1 for presentation order
             })),
         };
+
+        const response = await fetch(`${baseUrl}/api/v1/polls`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify(pollData),
+        });
+
+        if (response.ok) {
+            responseMessage = "Poll created!";
+            await goto("/polls");
+        } else {
+            const data = await response.json();
+            console.log(data.message);
+        }
 
         console.log("Poll created:", pollData);
         responseMessage = "Poll created!";
         // must be connected to api
+        handleEvents('createPoll', {
+            pollData: pollData
+        });
     }
 
-
+    async function fetchCsrfToken() {
+        const response = await fetch(`${baseUrl}/csrf`, {
+            method: "GET",
+            credentials: "include"
+        });
+        const data = await response.json();
+        return data.csrfToken;
+    }
 </script>
 
 <div class="nav-bar">
-    <span on:click={() => goto('/polls')} class="nav-item">Polls</span>
-    <span class="nav-item active">Create Poll</span>
+    <a href="/polls" class="nav-item">Polls</a>
+    <a href="/polls/new" class="nav-item active">Create Poll</a>
 </div>
 
 <div class="container">
     <div class="poll">
         <h2>Create New Poll</h2>
-        <form on:submit|preventDefault={createPoll} >
+        <form on:submit|preventDefault={createPoll}>
             <label for="question" class="question">Question:</label>
             <input type="text" id="question" bind:value={question} required />
 
             <div class="options-container">
                 {#each options as option, index}
                     <label for={"option" + index}>Option {index + 1}:</label>
-                    <input type="text" id={"option" + index} bind:value={options[index]} on:input={e => updateOption(index, e.target.value)} required />
+                    <input
+                        type="text"
+                        id={"option" + index}
+                        bind:value={options[index]}
+                        on:input={(e) => updateOption(index, e.target.value)}
+                        required
+                    />
                 {/each}
             </div>
+            <p>Valid until:</p>
+            <input type="date" bind:value={validUntil} placeholder="Valid Until" />
 
-            <button type="button" class="add-option" on:click={addOption}>Add Another Option</button>
+            <button type="button" class="add-option" on:click={addOption}
+                >Add Another Option</button
+            >
             <button type="submit" class="submit-button">Submit</button>
 
             <p>{responseMessage}</p>
@@ -87,6 +141,7 @@
         margin: 0 25px;
         padding: 15px;
         cursor: pointer;
+        text-decoration: none;
     }
 
     .nav-item.active {
@@ -133,7 +188,8 @@
         margin-bottom: 15px;
     }
 
-    .add-option, .submit-button {
+    .add-option,
+    .submit-button {
         margin-top: 15px;
         padding: 10px;
         background-color: grey;
@@ -148,7 +204,7 @@
         cursor: pointer;
     }
 
-    .question{
+    .question {
         font-size: 1.5rem;
     }
 

@@ -1,51 +1,277 @@
 
-<!-- this is the page for showing individual polls -->
+<!-- this is the page for showing individual polls. -->
 
-<script>
-    import { onMount } from 'svelte';
-    import { goto } from '$app/navigation';
-    import pollsData from '../../../data/fake_polls.json';
-    import { page } from '$app/stores';
+<script lang="ts">
+    import { onDestroy, onMount } from "svelte";
+    import { goto } from "$app/navigation";
+    import { page } from "$app/stores";
+    import { authStore } from "$lib/store";
 
     let poll = null;
     let pollId;
+    let authToken;
+    let userVote = null;
+    let unsubscribe;
+    let isExpired;
+    let userId: number;
 
-    $: pollId = $page.params.id ? parseInt($page.params.id) : null; // Ensure it's parsed as a number
 
-    onMount(() => {
-        const flattenedData = pollsData.flat();
+    $: pollId = $page.params.id ? parseInt($page.params.id) : null;
 
-        if (pollId) {
-            const foundPoll = flattenedData.find(p => p.id === pollId);
-            if (foundPoll) {
-                poll = foundPoll;
+    const baseUrl = "http://localhost";
+
+
+    async function fetchVoteOptions() {
+        try {
+            const response = await fetch(
+                `${baseUrl}/api/v1/polls/${pollId}/options`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                },
+            );
+            if (response.ok) {
+                poll.options = await response.json();
             } else {
+                console.error(
+                    "Failed to fetch vote options:",
+                    response.statusText,
+                );
+            }
+        } catch (error) {
+            console.error("Error fetching vote options:", error);
+        }
+    }
+
+    async function fetchVoteOptionCount() {
+        try {
+            const response = await fetch(
+                `${baseUrl}/api/v1/polls/${pollId}/vote-counts`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                },
+            );
+            if (response.ok) {
+                const voteCounts = await response.json();
+                poll.options = poll.options.map(option => {
+                    const voteCount = voteCounts[option.caption] || 0;
+                    return { ...option, voteCount };
+                });
+
+                poll = { ...poll };
+            } else {
+                console.error("Failed to fetch vote counts:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error fetching vote counts:", error);
+        }
+    }
+
+    onMount(async () => {
+        unsubscribe = authStore.subscribe((value) => {
+            authToken = value.authToken;
+        });
+
+        try {
+            await fetchUserId();
+
+            const response = await fetch(`${baseUrl}/api/v1/polls/${pollId}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (response.ok) {
+                poll = await response.json();
+                isExpired = new Date(poll.validUntil) < new Date();
+
+                if (!isExpired) {
+                    const voteResponse = await fetch(
+                        `${baseUrl}/api/v1/polls/${pollId}/votes/self`,
+                        {
+                            method: "GET",
+                            headers: {
+                                Authorization: `Bearer ${authToken}`,
+                            },
+                        },
+                    );
+
+                    userVote =
+                        voteResponse.ok && voteResponse.status !== 204
+                            ? await voteResponse.json()
+                            : null;
+                }
+
+                await fetchVoteOptions();
+                await fetchVoteOptionCount();
+            } else {
+                console.error("Poll not found:", response.statusText);
                 poll = null;
             }
+        } catch (error) {
+            console.error("Failed to fetch poll:", error);
+            poll = null;
         }
     });
 
-    function goBack() {
-        goto('/polls');
+    onDestroy(() => {
+        if (unsubscribe) {
+            unsubscribe();
+        }
+    });
+
+    async function makeVote(optionId) {
+        try {
+            const response = await fetch(
+                `${baseUrl}/api/v1/polls/${pollId}/options/${optionId}`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${authToken.trim()}`,
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+
+            if (response.ok) {
+                await fetchVoteOptions();
+                await fetchVoteOptionCount();
+                userVote = optionId;
+                poll = { ...poll };
+            } else {
+                console.error("Failed to vote:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error making vote:", error);
+        }
     }
+
+    async function removeVote(optionId) {
+        try {
+            const response = await fetch(`${baseUrl}/api/v1/polls/${pollId}/votes/`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (response.ok) {
+                userVote = null;
+                await fetchVoteOptions();
+                await fetchVoteOptionCount();
+
+            } else {
+                console.error("Failed to remove vote:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error removing vote:", error);
+        }
+    }
+
+    async function deletePoll() {
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this poll?",
+        );
+        if (confirmDelete) {
+            try {
+                const response = await fetch(
+                    `${baseUrl}/api/v1/polls/${pollId}`,
+                    {
+                        method: "DELETE",
+                        headers: {
+                            Authorization: `Bearer ${authToken}`,
+                        },
+                    },
+                );
+
+                if (response.ok) {
+                    console.log("Poll deleted successfully.");
+                    goto("/polls");
+                } else {
+                    console.error(
+                        "Failed to delete poll:",
+                        response.statusText,
+                    );
+                }
+            } catch (error) {
+                console.error("Error deleting poll:", error);
+            }
+        }
+    }
+
+    async function fetchUserId() {
+        const baseUrl = "http://localhost";
+        const url = `${baseUrl}/api/v1/users/self`;
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${authToken}`,
+            },
+        });
+
+        if (response.ok) {
+            userId = await response.json();
+        } else {
+            const error = await response.json();
+            console.error("Error fetching user ID:", error.message);
+            throw new Error(error.message);
+        }
+    }
+
+    function goBack() {
+        goto("/polls");
+    }
+
 </script>
 
 <div class="container">
     {#if poll}
-        <div class="poll">
+        <div class="poll {isExpired ? 'expired' : ''}">
+            {#if isExpired}
+                <p class="expired-message">Expired Poll</p>
+            {/if}
             <h2>{poll.question}</h2>
             <ul class="options-list">
-                {#each poll.options as option}
+                {#each poll.options as option (option.id)}
                     <li class="option-box">
                         <span>{option.caption}</span>
                         <div class="vote-button-container">
-                            <span class="vote-count">{option.votes || 0}</span>
-                            <button class="vote-button">Vote</button>
+                            <span class="vote-count"
+                                >{option.voteCount || 0}</span
+                            >
+                            {#if userVote === option.id}
+                                <button
+                                    class="remove-vote-button"
+                                    on:click={() => removeVote(option.id)}
+                                >
+                                    Remove Vote
+                                </button>
+                            {:else}
+                                <button
+                                    class="vote-button"
+                                    on:click={() => makeVote(option.id)}
+                                    disabled={userVote !== null || isExpired}
+                                >
+                                    Vote
+                                </button>
+                            {/if}
                         </div>
                     </li>
                 {/each}
             </ul>
             <button on:click={goBack} class="back-button">Back to Polls</button>
+
+
+            {#if poll.owner && parseInt(poll.owner.id) === parseInt(userId)}
+                <button on:click={deletePoll} class="delete-button" >Delete Poll</button>
+            {/if}
         </div>
     {:else}
         <p>Poll not found.</p>
@@ -53,15 +279,7 @@
 </div>
 
 <style>
-    body {
-        background-color: #f6f8fa;
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-    }
+
 
     .container {
         width: 100%;
@@ -83,9 +301,23 @@
         margin-top: 40px;
     }
 
+    .poll.expired {
+        background-color: #ffcccc;
+        color: #ff0000;
+    }
+
     .options-list {
         list-style-type: none;
         padding: 0;
+    }
+
+    .expired-message {
+        font-weight: bold;
+        font-size: 2rem;
+        text-decoration: underline;
+        color: #ff0000;
+        margin-bottom: 10px;
+        text-align: center;
     }
 
     .option-box {
@@ -97,6 +329,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        font-size: 2rem;
     }
 
     .vote-button-container {
@@ -107,11 +340,14 @@
 
     .vote-count {
         margin-right: 10px;
-        font-size: 1.5rem;
+        font-size: 2rem;
         display: inline;
     }
 
-    .back-button, .vote-button {
+    .delete-button,
+    .back-button,
+    .vote-button,
+    .remove-vote-button {
         margin-top: 15px;
         padding: 10px;
         background-color: grey;
@@ -123,7 +359,12 @@
         font-size: 1.2rem;
     }
 
-    .back-button:hover, .vote-button:hover {
+    .delete-button {
+        background-color: #ff0000;
+        width: auto;
+    }
+
+    .back-button:hover, .vote-button:hover, .remove-vote-button {
         background-color: darkgray;
     }
 

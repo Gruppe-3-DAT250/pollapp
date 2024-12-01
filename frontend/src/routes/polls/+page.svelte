@@ -2,42 +2,106 @@
 <!-- this is the page for showing all polls -->
 
 <script>
-    import { onMount } from 'svelte';
-    import { goto } from '$app/navigation';
-    import pollsData from '../../data/fake_polls.json';
+    import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
+    import { authStore } from "$lib/store.ts";
 
-    let polls = [];
 
-    onMount(() => {
-        polls = pollsData.flat(); // remove
+    let activePolls = [];
+    let expiredPolls = [];
+    let unsubscribe;
+    let authToken;
+
+    async function fetchPolls() {
+        const baseUrl = "http://localhost";
+        const url = `${baseUrl}/api/v1/polls`;
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${authToken}`,
+            },
+        });
+
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const error = await response.json();
+            console.error(error.message);
+            throw new Error(error.message);
+        }
+    }
+
+    onMount(async () => {
+        try {
+            unsubscribe = authStore.subscribe((value) => {
+                authToken = value.authToken;
+            });
+
+            const allPolls = await fetchPolls();
+
+            const now = new Date();
+            activePolls = allPolls
+                .filter((poll) => new Date(poll.validUntil) >= now)
+                .sort(
+                    (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt),
+                );
+            expiredPolls = allPolls
+                .filter((poll) => new Date(poll.validUntil) < now)
+                .sort(
+                    (a, b) => new Date(b.publishedAt) - new Date(a.publishedAt),
+                );
+        } catch (error) {
+            console.error("Failed to fetch polls:", error);
+        }
     });
+
     function selectPoll(id) {
         goto(`/polls/${id}`);
     }
 
-    function goToCreatePoll(){
-        goto('/polls/create_poll');
-    }
 
 </script>
 
+
 <div class="nav-bar">
-    <span on:click={() => goto('/polls')} class="nav-item active">Polls</span>
-    <span on:click={goToCreatePoll} class="nav-item">Create Poll</span>
+    <a href="/polls" class="nav-item active">Polls</a>
+    <a href="/polls/new" style="cursor: pointer;" class="nav-item"
+        >Create Poll</a
+    >
 </div>
 
 <div class="container">
     <div class="poll">
-        {#if polls.length > 0}
+        {#if activePolls.length > 0}
             <h2>Polls</h2>
-            {#each polls as poll}
+            {#each activePolls as poll}
                 <div class="poll-box">
                     <h1>{poll.question}</h1>
-                    <button on:click={() => selectPoll(poll.id)} class="choose-button">Choose Poll</button>
+                    <button
+                        on:click={() => selectPoll(poll.id)}
+                        class="choose-button">Choose Poll</button
+                    >
                 </div>
             {/each}
         {:else}
-            <h3>No polls available</h3>
+            <h3>No active polls available</h3>
+        {/if}
+
+        {#if expiredPolls.length > 0}
+            <h2 class="h2-expired">Expired Polls</h2>
+            {#each expiredPolls as poll}
+                <div class="poll-box expired">
+                    <h1>{poll.question}</h1>
+                    <button
+                        on:click={() => selectPoll(poll.id)}
+                        class="choose-button">View Poll</button
+                    >
+                </div>
+            {/each}
+        {:else}
+            <h3>No expired polls available</h3>
         {/if}
     </div>
 </div>
@@ -62,6 +126,7 @@
         margin: 0 25px;
         padding: 15px;
         cursor: pointer;
+        text-decoration: none;
     }
 
     .nav-item.active {
@@ -131,7 +196,18 @@
         font-size: 2rem;
     }
 
+    .h2-expired {
+        font-size: 2rem;
+        color: #ff0000;
+    }
+
     h3 {
         font-size: 1.75rem;
     }
+
+    .expired {
+        background-color: #ffcccc;
+        color: #ff0000;
+    }
+
 </style>
