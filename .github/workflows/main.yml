@@ -47,11 +47,9 @@ jobs:
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: List files in the root directory
-        run: ls -al /home/runner/work/
 
-      - name: Verify pollapp directory exists
-        run: ls -al /home/runner/work/pollapp
+      - name: Verify Dockerfile location
+        run: ls -al /home/runner/work/pollapp/pollapp
 
       - name: Build Docker image
         run: |
