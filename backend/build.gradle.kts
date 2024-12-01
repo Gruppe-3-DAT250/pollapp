@@ -70,7 +70,9 @@ tasks.asciidoctor {
     dependsOn(tasks.test)
 }
 
-
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    archiveFileName.set("backend.jar")
+}
 
 allprojects {
     tasks.register<Copy>("copyWebApp") {
