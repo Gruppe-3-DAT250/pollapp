@@ -12,6 +12,7 @@ version = "0.0.1-SNAPSHOT"
 springBoot {
     mainClass.set("gruppe3.pollapp.PollappApplication")
 }
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)

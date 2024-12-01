@@ -31,6 +31,7 @@ COPY --from=frontend-build /app/frontend/build/ backend/src/main/resources/stati
 
 RUN mv build/libs/backend.jar app.jar
 
+
 FROM eclipse-temurin:21-alpine
 
 RUN addgroup -g 1000 app && adduser -G app -D -u 1000 -h /app app
