@@ -10,7 +10,7 @@ COPY ./frontend ./
 RUN npm run build
 
 FROM nginx:latest AS frontend
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=frontend-build /app/frontend/build /usr/share/nginx/html
 
 EXPOSE 80
@@ -28,6 +28,7 @@ RUN gradle bootJar --no-daemon
 COPY backend/ ./
 COPY --from=frontend-build /app/frontend/build/ backend/src/main/resources/static/
 
+RUN gradle bootJar
 
 RUN mv build/libs/backend.jar app.jar
 
