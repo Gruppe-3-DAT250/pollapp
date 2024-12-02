@@ -80,9 +80,6 @@ allprojects {
         from("frontend/build")
         into("backend/src/main/resources/static")
         include("*.html")
-        doLast {
-            println("Web app copied successfully.")
-        }
     }
 }
 
